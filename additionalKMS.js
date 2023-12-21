@@ -1113,7 +1113,7 @@ list[ijmp]  = ["ジャンプ力", pt["移動速度"]];
 list[pdef]  = ["% 防御力", pt["% 防御力"]];
 list[idef]  = ["防御力",   pt["防御力"]];
 
-list[pdmp1] = ["% 消費HP減少", pt["% 消費MP減少1"]];
+list[pdmp1] = ["% 消費MP減少", pt["% 消費MP減少1"]];
 list[pdmp2] = ["% 消費MP減少", pt["% 消費MP減少2"]];
 
 
