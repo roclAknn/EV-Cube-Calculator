@@ -42,5 +42,7 @@ KMSにはないヘキサキューブの確率も出力できるようにして�
 
 出力結果について公式に問い合わせることなどは絶対にしないでください<br>
 
+![image](https://github.com/roclAknn/EV-Cube-Calculator/assets/80640021/0582402d-a351-4308-a5be-2529d8d0d54d)
+
 
 
