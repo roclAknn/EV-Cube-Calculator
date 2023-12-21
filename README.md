@@ -1,5 +1,5 @@
 # EV-Cube-Calculator
-GitHub Pages -> https://roclaknn.github.io/EV-RebirthFlame/index.html
+GitHub Pages -> https://roclaknn.github.io/EV-Cube-Calculator/index.html
 
 #### 概要
 潜在能力を重複させたい場合などにいくつのキューブが必要になるかをほぼ正確に出力します<br>
