@@ -1,4 +1,6 @@
 
+
+
 const cubetypes = [
   ["KMS/レッドキューブ",   regularKMS, "red"]
 , ["KMS/ブラックキューブ", regularKMS, "black"]
@@ -409,11 +411,11 @@ function ondo(){
   
   let inputscores = document.getElementsByClassName("input-score");
   
+  let errlist1 = data.potentialerrorlist;
+  let errlist2 = data.potentialerrorlist2;
   
   let scores = [];
-  
-  let errlist = data.potentialerrorlist;
-  let weight0 = [0, 0];
+  let maxscore = 0; /* 全スコア未入力判定用 */
   
   for(let i = 0; i < inputscores.length; i++){
     let inputscore = inputscores[i];
@@ -429,92 +431,45 @@ function ondo(){
     let wdata = ws[n][ i+1 - ( n ? (ws[0].length-1) : 0 ) ];
     
     /**
-    * 最適化のため潜在の評価値が0かつ重複制限リストにないなら抽選率の比重をまとめる
+    * 最適化のためスコアと重複制限グループが同じなら抽選率の比重をまとめる
+    * scores[i] = [スコア　[上位比重　下位比重]　重複エラーグループ]
     */
-    let id = wdata[1];
-    let boolweight0 = (val == 0);
-    switch( boolweight0 ){
-      case true:
-        a:for(let err of errlist){
-          for(let e of err[0]){
-            if( id != e ) continue;
-            boolweight0 = false;
-            break a;
-          }
-        }
-        if( boolweight0 ){
-          weight0[n] += wdata[0];
-          break;
-        }
-      default:
-        /* スコア, 同等級か(=0), 抽選比重, 潜在id */
-        scores.push([ val, n, wdata[0], wdata[1] ]);
+    let w = wdata[0];
+    let pid = wdata[1];
+    let eid = errlist2[pid];
+    if( eid == undefined ) eid = -1;
+    let bool = true;
+    for(let sc of scores){
+      if(sc[0] == val && sc[2] == eid){
+        sc[1][n] += w;
+        bool = false;
+        break;
+      }
+    }
+    if( bool ){
+      if( maxscore < val ) maxscore = val;
+      scores.push([val, (n ? [0, w] : [w, 0]), eid]);
     }
   }
-  scores.sort((a,b)=>{/* スコアで降順ソート */ return (a[0] < b[0]) - (a[0] > b[0])});
-  scores.push([ 0, 0, weight0[0], -1]);
-  scores.push([ 0, 1, weight0[1], -1]);
+  
+  for(let sc of scores){
+    sc[1][0] = new BigNumber(sc[1][0]).div(ws[0][0]);
+    sc[1][1] = new BigNumber(sc[1][1]).div(ws[1][0]);
+  }
+  
   
   /**
   * 重複エラー処理について
   * KMS公式より：１行目から設定していき、潜在重複エラーならその行の等級抽選からやり直す？
   */
-  let scs = [], vs = [], rs = [];
+  let vs = [], rs = [];
   let result = {};
   
-  if( 0 < scores[0][0] ){
-    calc(0, maxline, false);
+  if( 0 < maxscore ){
+    calc( 0, maxline, [[new BigNumber(0), new BigNumber(0)], [], []] );
   }else{
     result["0"] = 1;
   }
-  
-  /* line=line～maxline-1の再帰処理 */
-  function calc(line=0, maxline=3, boolchkerr=false){
-    let erw = [[0, 0], []];
-    let err = new BigNumber(0);
-    if( boolchkerr ){ /* line-1行までに制限潜在があれば制限処理 */
-      /* line行で重複制限を引く(=この行を引き直す)確率 */
-      erw = getreachweight(data, scores, scs);
-      erw[0].forEach(( w, i )=>{
-        if( !w ) return;
-        let r = new BigNumber( w ).div( ws[ i ][0] ).times( cuberankrate[line][i] );
-        err = err.plus( r );
-      });
-    }
-    
-    for(let sc of scores){
-      scs[line] = sc;
-      if( erw[1][ sc[3] ] ) continue; /* 重複制限チェック */
-      if( cuberankrate[line][ sc[1] ] <= 0 ) continue; /* 等級抽選率が0なら次 */
-      
-      vs[line] = new BigNumber( sc[0] );
-      rs[line] = new BigNumber( sc[2] ).div( ws[ sc[1] ][0] ).times( cuberankrate[line][sc[1]] ).div( new BigNumber(1).minus(err) );
-      
-      if( line+1 < maxline ){
-        let eid = data.potentialerrorlist2[ sc[3] ];
-        calc(line+1, maxline, boolchkerr || 0 <= eid);
-        continue;
-      }
-      
-      /* 最終行の処理 */
-      let vs2 = vs;
-      if( 3 < maxline ){
-        /* 仮ヘキサキューブ用 スコアの高い順にmaxline行最大3行のスコアをまとめる */
-        vs2 = vs2.concat().sort((a,b)=>{/* 降順ソート */ return (a < b) - (a > b)});
-      }
-      let v = new BigNumber(0);
-      for(let i = 0, imax = Math.min(maxline, 3); i < imax; i++){
-        v = v.plus(vs2[i]);
-      }
-      let r = new BigNumber(1);
-      for( let rr of rs ){
-        r = r.times( rr );
-      }
-      result["" + v] = r.plus( result["" + v] || 0 );
-    }
-    return;
-  }
-  
   
   /**
   *  スコア個別の確率から個別＆合計の期待値に変換
@@ -526,37 +481,87 @@ function ondo(){
     result[v] = [new BigNumber(1).div(result[v]), new BigNumber(1).div(r)];
   }
   return result;
-}
-
-/**
-* 潜在の重複制限に達しているかの判定 (ボスダメや被撃時無敵など)
-* return [ [重み0, 重み1], 制限到達[潜在ID: true/undefined] ]
-*/
-
-function getreachweight(data, scores, sn = []){
-  let reachs = [];
-  let result = [[0, 0], reachs];
-  let errlist1 = data.potentialerrorlist;
-  let errlist2 = data.potentialerrorlist2;
-  let errs = [];
-  let isreach = false;
-  for(let i = 0; i < sn.length; i++){
-    let eid = errlist2[sn[i][3]];
-    if( eid == undefined ) continue;
-    let edata = errlist1[eid];
-    errs[eid] = 1 + (errs[eid] || 0);
-    if( edata[1] == errs[eid] ){
-      for(let pid of edata[0]){
-        reachs[pid] = true;
-        isreach = true;
-      };
+  
+  
+  /* line=line～maxline-1の再帰処理 */
+  function calc(line=0, maxline=3, erw ){
+    
+    let err = new BigNumber(0);
+    if( erw[2].length ){ /* line-1行までに制限潜在があれば制限処理 */
+      /* line行で重複制限を引く(=この行を引き直す)確率 */
+      err = erw[0][0].times( cuberankrate[line][0] ).plus( err );
+      err = erw[0][1].times( cuberankrate[line][1] ).plus( err );
     }
-  }
-  if(isreach){
+    
     for(let sc of scores){
-      if( !reachs[sc[3]] ) continue;
-      result[0][ sc[1] ] += sc[2];
+      let r, v;
+      
+      let eid = sc[2];
+      if( erw[2][ eid ] ) continue; /* 重複制限チェック */
+      
+      r =         sc[1][0].times( cuberankrate[line][0] );
+      r = r.plus( sc[1][1].times( cuberankrate[line][1] ) );
+      if( r <= 0 ) continue;
+      
+      vs[line] = new BigNumber( sc[0] );
+      rs[line] = r.div( new BigNumber(1).minus(err) );
+      
+      if( line+1 < maxline ){
+        let erw2 = erw;
+        let eid = sc[2];
+        if( eid < 0 ){
+        }else{
+          erw2 = [erw[0].concat(), erw[1].concat(), erw[2].concat()];
+          erw2[1][eid] = 1 + ( erw2[1][eid] || 0 );
+          if( errlist1[eid][1] <= erw2[1][eid] ){
+            erw2[2][eid] = true;
+            for(let esc of scores){
+              if( esc[2] != eid ) continue;
+              erw2[0][0] = erw2[0][0].plus(esc[1][0]);
+              erw2[0][1] = erw2[0][1].plus(esc[1][1]);
+            }
+          }
+        }
+        calc(line+1, maxline, erw2);
+        continue;
+      }
+      
+      /* 以降は最終行のみ処理 */
+      v = new BigNumber(0);
+      if( 3 < maxline ){ /* 仮ヘキサキューブ用 スコアの高い順にmaxline行最大3行のスコアをまとめる */
+        //vs.sort((a,b)=>{/* 降順ソート */ return (a < b) - (a > b)});
+        let v0 = 0, v1 = 0, v2 = 0;
+        for(let v of vs){
+          if(v <= 0) continue;
+          if(v2 > v){
+            break;
+          }else if(v1 > v){
+            v2 = v;
+          }else{
+            v2 = v1;
+            if(v0 > v){
+              v1 = v;
+            }else{
+              v1 = v0;
+              v0 = v;
+            }
+          }
+        }
+        v = v.plus(v0).plus(v1).plus(v2);
+      }else{
+        for(let i = 0, imax = Math.min(maxline, 3); i < imax; i++){
+          v = v.plus(vs[i]);
+        }
+      }
+      
+      r = new BigNumber(1);
+      for( let rr of rs ){
+        r = r.times( rr );
+      }
+      result["" + v] = r.plus( result["" + v] || 0 );
     }
+    return;
   }
-  return result;
+  
 }
+
