@@ -267,7 +267,7 @@ function createTable(list) {
     
     for(let kk of list[k]){
       let rateint = Math.trunc(kk);
-      let ratedecimal = kk - rateint; /* Bignumberを使わない */
+      let ratedecimal = kk - rateint; /* 出力結果丸めたいのでBignumberを使わない */
       rateint = "" + rateint + (ratedecimal > 0 ? "." : "");
       ratedecimal = ("" + ratedecimal).split(".")[1] || "";
       inner += `<td><span class="int">${rateint}</span><span class="decimal">${ratedecimal}</span></td>`;
@@ -343,13 +343,6 @@ function createcubetable(){
     
     weights[0] = sumweight;
     data.exportdata.push(weights);
-    
-    /* 等級などを表示するヘッダーを作成 */
-    //let headdiv = document.createElement("div");
-    //headdiv.className = "gridbox1 cell potentialrank-" + rank;
-    //headdiv.style.cssText = "grid-column: 1 / span 4; display: grid; grid-template-columns: repeat(3, 1fr);";
-    //headdiv.innerHTML = `<div class="gridbox1 cell">${data.ranks[rank]}</div><div class="gridbox1 cell">${data.equipments[eqp]}</div><div class="gridbox1 cell">レベル ${lv}</div>`;
-    //fragment.appendChild(headdiv);
     
     for(let trdata of trdatas){
       let valdiv = document.createElement("div");
@@ -501,7 +494,7 @@ function ondo(){
       
       r =         sc[1][0].times( cuberankrate[line][0] );
       r = r.plus( sc[1][1].times( cuberankrate[line][1] ) );
-      if( r <= 0 ) continue;
+      if( +r <= 0 ) continue;
       
       vs[line] = new BigNumber( sc[0] );
       rs[line] = r.div( new BigNumber(1).minus(err) );
@@ -532,19 +525,18 @@ function ondo(){
         //vs.sort((a,b)=>{/* 降順ソート */ return (a < b) - (a > b)});
         let v0 = 0, v1 = 0, v2 = 0;
         for(let v of vs){
+          v = +v;
           if(v <= 0) continue;
-          if(v2 > v){
-            break;
-          }else if(v1 > v){
-            v2 = v;
+          if(v2 >= v) continue;
+          if(v1 >= v){
+            v2 = v;  continue;
+          }
+          v2 = v1;
+          if(v0 >= v){
+            v1 = v;
           }else{
-            v2 = v1;
-            if(v0 > v){
-              v1 = v;
-            }else{
-              v1 = v0;
-              v0 = v;
-            }
+            v1 = v0;
+            v0 = v;
           }
         }
         v = v.plus(v0).plus(v1).plus(v2);
@@ -558,10 +550,14 @@ function ondo(){
       for( let rr of rs ){
         r = r.times( rr );
       }
+      
       result["" + v] = r.plus( result["" + v] || 0 );
     }
     return;
   }
   
 }
+
+
+
 
