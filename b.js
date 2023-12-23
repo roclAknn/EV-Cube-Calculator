@@ -20,18 +20,6 @@ const cubegroups = [
 , ["KMS/下潜在/共通テーブル", [5, 6]]
 , ["非公式テーブル", [7]]
 ];
-const equipmenttypes = [
-  "武器",   "エンブレム", "補助武器", "フォースシールド/ソウルリング", "盾"
-, "帽子",   "服(上)",     "服(全身)", "服(下)",     "靴"
-, "手袋",   "マント",     "ベルト",   "肩",         "顔飾り"
-, "目飾り", "イヤリング", "指輪",     "ペンダント", "機械心臓"
-];
-
-const potentialranks = [
-  "レジェンダリー", "ユニーク", "エピック", "レア", "ノーマル"
-];
-
-const rankclassnames = ["legendary", "unique", "epic", "rare", "normal"];
 
 window.selectedcube = null;
 window.selectedequipmenttype = -1;
@@ -39,10 +27,15 @@ window.selectedequipmentlevel = -1;
 window.selectedrank = -1;
 window.selectedmaxline = -1;
 
+/*===== ページロード後初期化処理 ===============================================*/
+function initialize(){
+  initcubedatas();
+  UIinitialize();
+}
 
 /*===== UI処理 =================================================================*/
 
-function initialize(){
+function UIinitialize(){
   let sel = document.getElementById("input-cubetype");
   let inner = "";
   
@@ -61,8 +54,8 @@ function initialize(){
   
   sel = document.getElementById("input-equipmenttype");
   inner = "";
-  for(let i = 0; i < equipmenttypes.length; i++){
-    inner += `<option value=${i}>${equipmenttypes[i]}</option>`;
+  for(let i = 0; i < commons.equipmentnames.length; i++){
+    inner += `<option value=${i}>${commons.equipmentnames[i]}</option>`;
   }
   sel.innerHTML += inner;
   sel.disabled = false;
@@ -73,7 +66,7 @@ function initialize(){
   sel = document.getElementById("input-potentialrank");
   inner = "";
   for(let i = 0; i < 4; i++){
-    inner += `<option value=${i}>${potentialranks[i]}</option>`;
+    inner += `<option value=${i}>${commons.ranknames[i]}</option>`;
   }
   sel.innerHTML += inner;
   sel.disabled = false;
@@ -185,9 +178,9 @@ function conditionupdate(){
   let date = window.selectedcube[1].date;
   
   document.getElementById("condition-cube").innerHTML = name;
-  document.getElementById("condition-eqp").innerHTML = equipmenttypes[eqp];
+  document.getElementById("condition-eqp").innerHTML = commons.equipmentnames[eqp];
   document.getElementById("condition-level").innerHTML = "Lv." + lv;
-  document.getElementById("condition-rank").innerHTML = potentialranks[rank];
+  document.getElementById("condition-rank").innerHTML = commons.ranknames[rank];
   document.getElementById("condition-date").innerHTML = date.toLocaleDateString();
 }
 
@@ -216,7 +209,7 @@ function setcubeinfodiv(){
   }
   
   for(let i = 0; i < ratetable.length; i++){
-    let cn = rankclassnames[i];
+    let cn = commons.rankclassnames[i];
     let divs = document.querySelectorAll("#cubeinfodiv .data." + cn);
     for(let ii = 0; ii <= 3; ii++){
       let rate;
@@ -346,7 +339,7 @@ function createcubetable(){
     
     for(let trdata of trdatas){
       let valdiv = document.createElement("div");
-      valdiv.className = `gridbox1 cell ${rankclassnames[rank]}`;
+      valdiv.className = `gridbox1 cell ${commons.rankclassnames[rank]}`;
       valdiv.dataset.potentialdepth = trdata[3];
       
       let namediv = valdiv.cloneNode();
@@ -386,7 +379,6 @@ function oninputscore(){
     createTable(list);
   }, oninputscore.delay);
 }
-
 
 function onchangedisplayamount(){
   let divs = document.querySelectorAll(`#potentialdiv div[data-potentialdepth]`)
@@ -495,7 +487,6 @@ function ondo(){
   
   /* line=line～maxline-1の再帰処理 */
   function calc(line=0, maxline=3, erw ){
-    
     let err = new BigNumber(0);
     if( erw[2].length ){ /* line-1行までに制限潜在があれば制限処理 */
       /* line行で重複制限を引く(=この行を引き直す)確率 */
@@ -574,6 +565,13 @@ function ondo(){
   }
   
 }
+
+
+
+
+
+
+
 
 
 
