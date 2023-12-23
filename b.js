@@ -370,8 +370,10 @@ function createcubetable(){
     }
   }
 }
+
+oninputscore.delay = 1000;
 function oninputscore(){
-  /* ヘキサキューブのみ重いので、スコアの入力がしやすいよう即時反映ではなく遅延させる */
+  /* ヘキサキューブのみ重いので、スコアの入力がしやすいよう即時反映せずに遅延させる */
   let cubename = window.selectedcube[2];
   if( cubename != "hexa" ){
     return createTable(ondo());
@@ -382,7 +384,7 @@ function oninputscore(){
     let list = ondo();
     if( sid != oninputscore.sid ) return;
     createTable(list);
-  }, 1000);
+  }, oninputscore.delay);
 }
 
 
