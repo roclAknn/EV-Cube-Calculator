@@ -273,10 +273,6 @@ createTable.switch = function(type=0){
         list2[v] = [new BigNumber(1).div(rr), new BigNumber(1).div(r)];
         break;
       case 2: /* とりあえずライブラリ追加なしで */
-        if( r.gte(1) ){
-          
-        }
-        r.gte(1)
         list2[v] = [ e50.div( Math.log( +one.minus(rr) ) ), e50.div( Math.log( one.minus(r) ))];
         break;
       case 3:
