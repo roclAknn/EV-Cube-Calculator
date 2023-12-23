@@ -284,7 +284,7 @@ createTable.switch = function(type=0){
   let tr = table.insertRow(0);
   tr.classList.add("coltitle");
   tr.innerHTML = `<td>Score</td><td>${titlestr[type]}(==Score)</td><td>${titlestr[type]}(>=Score)</td>`;
-  tr.onclick = createTable.switch.bind( createTable, (type+1)%4 );
+  tr.onclick = tr.ontouch = createTable.switch.bind( createTable, (type+1)%4 );
   trlist.length = 0;
   
   for (let i = 0; i < keys.length; i++) {
