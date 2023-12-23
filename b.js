@@ -243,13 +243,48 @@ function setcubeinfodiv(){
 }
 
 const trlist = [];
-function createTable(list) {
-  let keys = Object.keys(list).sort((a,b)=>{/* 降順ソート */ return (+a < +b) - (+a > +b)});
+function createTable(list, type=1){/* type:出力タイプ デフォルトは期待値 */
+  createTable.list = list;
+  createTable.switch(type);
+}
+
+/* 期待値、中央値、確率の表示を設定/切替 */
+createTable.switch = function(type=0){
+  let list = this.list;
+  let list2 = {};
+  
+  let keys = Object.keys(list).sort((a,b)=>{/* スコア降順ソート */ return (+a < +b) - (+a > +b)});
+  let r = new BigNumber(0);
+  let one = new BigNumber(1);
+  let e50 = new BigNumber( Math.LN2 ).times(-1);
+  let e05 = new BigNumber( Math.LN2 ).plus( Math.LN10 ).times( -1 );
+  for(let v of keys){
+    r = r.plus(list[v]);
+    switch(type){
+      case 0: 
+        list2[v] = [list[v], r];
+        break;
+      case 1: 
+        list2[v] = [new BigNumber(1).div(list[v]), new BigNumber(1).div(r)];
+        break;
+      case 2: /* とりあえずライブラリ追加なしで */
+        list2[v] = [ e50.div( Math.log( +one.minus( list[v]) ) ), e50.div( Math.log( one.minus(r) ))];
+        break;
+      case 3:
+        list2[v] = [ e05.div( Math.log( +one.minus( list[v]) ) ), e05.div( Math.log( one.minus(r) ))];
+        break;
+    }
+  }
+  list = list2;
+  
+  let titlestr = ["確率[1/10000]", "平均値[個]", "50％ライン[個]", "95％ライン[個]"]
+  
   
   let table = document.createElement("table");
   let tr = table.insertRow(0);
   tr.classList.add("coltitle");
-  tr.innerHTML = `<td>Score</td><td>平均消費数 (==Score)</td><td>平均消費数 (>=Score)</td>`;
+  tr.innerHTML = `<td>Score</td><td>${titlestr[type]}(==Score)</td><td>${titlestr[type]}(>=Score)</td>`;
+  tr.onclick = createTable.switch.bind( createTable, (type+1)%4 );
   trlist.length = 0;
   
   for (let i = 0; i < keys.length; i++) {
@@ -259,11 +294,14 @@ function createTable(list) {
     let inner =  `<td>${k}</td>`;
     
     for(let kk of list[k]){
+      if(type == 0){/* 確率表示用 */
+        kk = kk.times(10000);
+      }
       let rateint = Math.trunc(kk);
       let ratedecimal = kk - rateint; /* 出力結果丸めたいのでBignumberを使わない */
       rateint = "" + rateint + (ratedecimal > 0 ? "." : "");
       ratedecimal = ("" + ratedecimal).split(".")[1] || "";
-      inner += `<td><span class="int">${rateint}</span><span class="decimal">${ratedecimal}</span></td>`;
+      inner += `<td><span class="int">${rateint}</span><span class="decimal">${ratedecimal}</span>`;
     }
     row.innerHTML = inner;
   }
@@ -271,7 +309,7 @@ function createTable(list) {
   tdiv.innerHTML = "";
   tdiv.appendChild(table);
   return false;
-}
+};
 
 
 function createcubetable(){
@@ -473,15 +511,6 @@ function ondo(){
     result["0"] = 1;
   }
   
-  /**
-  *  スコア個別の確率から個別＆合計の期待値に変換
-  */
-  let keys = Object.keys(result).sort((a,b)=>{/* 降順ソート */ return (+a < +b) - (+a > +b)});
-  let r = new BigNumber(0);
-  for(let v of keys){
-    r = r.plus(result[v]);
-    result[v] = [new BigNumber(1).div(result[v]), new BigNumber(1).div(r)];
-  }
   return result;
   
   
@@ -565,11 +594,6 @@ function ondo(){
   }
   
 }
-
-
-
-
-
 
 
 
