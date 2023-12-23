@@ -259,19 +259,28 @@ createTable.switch = function(type=0){
   let e50 = new BigNumber( Math.LN2 ).times(-1);
   let e05 = new BigNumber( Math.LN2 ).plus( Math.LN10 ).times( -1 );
   for(let v of keys){
-    r = r.plus(list[v]);
+    let rr = list[v];
+    if     ( rr.gt(1) ) rr = new BigNumber(1);
+    else if( rr.lt(0) ) rr = new BigNumber(0);
+    r = r.plus(rr);
+    if     ( r.gt(1) ) r = new BigNumber(1);
+    else if( r.lt(0) ) r = new BigNumber(0);
     switch(type){
       case 0: 
-        list2[v] = [list[v], r];
+        list2[v] = [rr, r];
         break;
       case 1: 
-        list2[v] = [new BigNumber(1).div(list[v]), new BigNumber(1).div(r)];
+        list2[v] = [new BigNumber(1).div(rr), new BigNumber(1).div(r)];
         break;
       case 2: /* とりあえずライブラリ追加なしで */
-        list2[v] = [ e50.div( Math.log( +one.minus( list[v]) ) ), e50.div( Math.log( one.minus(r) ))];
+        if( r.gte(1) ){
+          
+        }
+        r.gte(1)
+        list2[v] = [ e50.div( Math.log( +one.minus(rr) ) ), e50.div( Math.log( one.minus(r) ))];
         break;
       case 3:
-        list2[v] = [ e05.div( Math.log( +one.minus( list[v]) ) ), e05.div( Math.log( one.minus(r) ))];
+        list2[v] = [ e05.div( Math.log( +one.minus(rr) ) ), e05.div( Math.log( one.minus(r) ))];
         break;
     }
   }
@@ -508,7 +517,7 @@ function ondo(){
   if( 0 < maxscore ){
     calc( 0, maxline, [[new BigNumber(0), new BigNumber(0)], [], []] );
   }else{
-    result["0"] = 1;
+    result["0"] = new BigNumber(1);
   }
   
   return result;
@@ -594,6 +603,11 @@ function ondo(){
   }
   
 }
+
+
+
+
+
 
 
 
