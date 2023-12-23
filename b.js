@@ -361,7 +361,7 @@ function createcubetable(){
       valdiv.innerHTML = trdata[1][1] || "";
       namediv.innerHTML = trdata[0];
       ratediv.innerHTML = "" + (Math.round(trdata[2] * 100*10**4 / sumweight) / 10**4) + " %";
-      scorediv.innerHTML = `<input class="input-status no-spin input-score input-score-${trdata[4]}" type="number" oninput="createTable(ondo());">`;
+      scorediv.innerHTML = `<input class="input-status no-spin input-score input-score-${trdata[4]}" type="number" oninput="oninputscore();">`;
       
       fragment.appendChild(valdiv);
       fragment.appendChild(namediv);
@@ -370,6 +370,21 @@ function createcubetable(){
     }
   }
 }
+function oninputscore(){
+  /* ヘキサキューブのみ重いので、スコアの入力がしやすいよう即時反映ではなく遅延させる */
+  let cubename = window.selectedcube[2];
+  if( cubename != "hexa" ){
+    return createTable(ondo());
+  }
+  clearTimeout(oninputscore.sid);
+  oninputscore.sid = setTimeout(()=>{
+    let sid = oninputscore.sid;
+    let list = ondo();
+    if( sid != oninputscore.sid ) return;
+    createTable(list);
+  }, 1000);
+}
+
 
 function onchangedisplayamount(){
   let divs = document.querySelectorAll(`#potentialdiv div[data-potentialdepth]`)
