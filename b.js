@@ -243,13 +243,14 @@ function setcubeinfodiv(){
 }
 
 const trlist = [];
-function createTable(list, type=1){/* type:出力タイプ デフォルトは期待値 */
+createTable.type = 1;
+function createTable(list, type=-1){/* type:出力タイプ デフォルトは期待値 */
   createTable.list = list;
   createTable.switch(type);
 }
 
 /* 期待値、中央値、確率の表示を設定/切替 */
-createTable.switch = function(type=0){
+createTable.switch = function(type=-1){
   if( type < 0 ) type = createTable.type;
   else           createTable.type = type;
   
