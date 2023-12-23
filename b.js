@@ -250,6 +250,9 @@ function createTable(list, type=1){/* type:出力タイプ デフォルトは期
 
 /* 期待値、中央値、確率の表示を設定/切替 */
 createTable.switch = function(type=0){
+  if( type < 0 ) type = createTable.type;
+  else           createTable.type = type;
+  
   let list = this.list;
   let list2 = {};
   
