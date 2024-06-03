@@ -197,7 +197,7 @@ select.input-status::-ms-expand {
   overflow: hidden;
 }
 #tablediv .coltitle {
-  background-color: #d9d9d9;
+  background-color: #d0d0d0;
   font-size: 14px;
 }
 #tablediv span.decimal {
@@ -301,7 +301,7 @@ input.error {
   overflow: hidden;
 }
 #potentialdiv .potential-head {
-  background-color: #ddd;
+  background-color: #d0d0d0;
   justify-content: center;
   min-width:50px;
   height: 25px;
