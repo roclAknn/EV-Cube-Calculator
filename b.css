@@ -42,7 +42,8 @@ div.grid {
 
 #settingdiv {
   grid-auto-flow: column;
-  grid-template-rows: 0px repeat(5, 50px) 20px;
+  /*grid-template-rows: 0px repeat(5, 50px) 20px;*/
+  grid-template-rows: 0px repeat(6, 44px) 20px;
   width: 240px;
 }
 
@@ -130,7 +131,7 @@ div.grid {
 
 /* gridboxのpaddingレイアウト */
 #headerdiv .cell {
-  min-height: 50px;
+  min-height: 40px;
 }
 #headerdiv .cell.top{
   padding: 0px;
@@ -164,6 +165,10 @@ div.grid {
 
 input.input-status {
   width: 40px;
+}
+input[type="checkbox"].input-status {
+  width: unset;
+  transform: scale(1.2);
 }
 
 select.input-status {
