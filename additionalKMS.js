@@ -23,6 +23,8 @@ additionalKMS.init = function(){
     * キューブの種類>潜在等級>各行の同等級付与率
     * 汎用処理で[同等級率, 下位等級率]に書き換える
     */
+    data.fixlinenum = {
+    };
     data.ratetable = {
       "additional" : [
           [1, 0.004975, 0.004975]
