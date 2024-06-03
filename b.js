@@ -11,6 +11,7 @@ const cubetypes = [
 , ["KMS/アディショナル・ホワイトアディショナルキューブ", additionalKMS, "additional"]
 , ["KMS/怪しいアディショナルキューブ", additionalKMS, "rareadditional"]
 
+, ["TMS/ユニキューブ", regularTMS, "uni"]
 , ["非公式/ヘキサキューブ(KMS無償テーブル)", regularKMS, "hexa"]
 ];
 
@@ -18,7 +19,7 @@ const cubegroups = [
   ["KMS/上潜在/有償テーブル", [0, 1]]
 , ["KMS/上潜在/無償テーブル", [2, 3, 4]]
 , ["KMS/下潜在/共通テーブル", [5, 6]]
-, ["非公式テーブル", [7]]
+, ["その他", [7, 8]]
 ];
 
 window.selectedcube = null;
@@ -259,6 +260,11 @@ function createTable(list, type=-1){/* type:出力タイプ デフォルトは�
 
 /* 期待値、中央値、確率の表示を設定/切替 */
 createTable.switch = function(type=-1){
+  let cubename;
+  let linenum;
+  if( window.selectedcube ) cubename = window.selectedcube[2];
+  if( window.selectedmaxline ) linenum = window.selectedmaxline;
+  
   if( type < 0 ) type = createTable.type;
   else           createTable.type = type;
   
@@ -274,12 +280,20 @@ createTable.switch = function(type=-1){
     let rr = list[v];
     if     ( rr.gt(1) ) rr = new BigNumber(1);
     else if( rr.lt(0) ) rr = new BigNumber(0);
+    
+    /* ユニキューブは潜在行数を行選択確率として使う */
+    if(cubename == "uni"){
+      rr = rr.times(+linenum).div(3);
+    }
+    
     r = r.plus(rr);
     if     ( r.gt(1) ) r = new BigNumber(1);
     else if( r.lt(0) ) r = new BigNumber(0);
+    
+    
     switch(type){
       case 0: 
-        list2[v] = [rr, r];
+        list2[v] = [rr.times(10000), r.times(10000)];
         break;
       case 1: 
         list2[v] = [new BigNumber(1).div(rr), new BigNumber(1).div(r)];
@@ -290,18 +304,21 @@ createTable.switch = function(type=-1){
       case 3:
         list2[v] = [ e05.div( Math.log( +one.minus(rr) ) ), e05.div( Math.log( one.minus(r) ))];
         break;
+      case 4:
+        list2[v] = [rr.times(100), r.times(100)];
+        break;
     }
   }
   list = list2;
   
-  let titlestr = ["確率[1/10000]", "平均値[個]", "50％ライン[個]", "95％ライン[個]"]
+  let titlestr = ["確率[1/10000]", "平均値[個]", "50％ライン[個]", "95％ライン[個]", "確率[1/100]"]
   
   
   let table = document.createElement("table");
   let tr = table.insertRow(0);
   tr.classList.add("coltitle");
   tr.innerHTML = `<td>Score</td><td>${titlestr[type]}(==Score)</td><td>${titlestr[type]}(>=Score)</td>`;
-  tr.onclick = tr.ontouch = createTable.switch.bind( createTable, (type+1)%4 );
+  tr.onclick = tr.ontouch = createTable.switch.bind( createTable, (type+1)%5 );
   trlist.length = 0;
   
   for (let i = 0; i < keys.length; i++) {
@@ -311,9 +328,6 @@ createTable.switch = function(type=-1){
     let inner =  `<td>${k}</td>`;
     
     for(let kk of list[k]){
-      if(type == 0){/* 確率表示用 */
-        kk = kk.times(10000);
-      }
       let rateint = Math.trunc(kk);
       let ratedecimal = kk - rateint; /* 出力結果丸めたいのでBignumberを使わない */
       rateint = "" + rateint + (ratedecimal > 0 ? "." : "");
@@ -337,7 +351,7 @@ function createcubetable(){
   
   let data     = window.selectedcube[1];
   let cubename = window.selectedcube[2];
-  let pweights = data.weights[cubename];
+  //let pweights = data.weights[cubename];
   
   let ownerdiv = document.getElementById("potentialdiv");
   
@@ -360,11 +374,14 @@ function createcubetable(){
     let trdatas = [];
     let sumweight = 0;
     let weights = [0];
-    data.equipmentpotential[cubename][eqp][rank].forEach((pnum)=>{
+    data.equipmentpotential[cubename][eqp][rank].forEach((pdata)=>{
+      let pnum = pdata[0];
+      
       let pname     = data.potentialinfolist[pnum][0];
       let pinfolist = data.potentialinfolist[pnum][1];
       let pdepth = pinfolist[0];
       let pinfo  = pinfolist[1 + rank];
+      
       if(pinfo.length <= 0){
         console.error("潜在情報の指定等級の情報が空");
         console.log([pnum, pname, pinfo]);
@@ -378,10 +395,12 @@ function createcubetable(){
       }
       if(!pval) return;
       
-      let rateweight = pweights[pnum][rank];
+      //let rateweight = pweights[pnum][rank];
+      let rateweight = pdata[1];
       if( !rateweight || isNaN(rateweight) ){
         console.error("重みづけが不正");
-        console.log([pnum, pname, rateweight, pweights]);
+        //console.log([pnum, pname, rateweight, pweights]);
+        console.log([pnum, pname, rateweight, pdata[1]]);
       }
       sumweight += rateweight;
       weights.push([rateweight, pnum]);
