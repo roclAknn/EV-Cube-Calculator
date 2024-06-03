@@ -25,6 +25,9 @@ regularKMS.init = function(){
     * キューブの種類>潜在等級>各行の同等級付与率
     * 汎用処理で[同等級率, 下位等級率]に書き換える
     */
+    data.fixlinenum = {
+        "hexa": 6
+    };
     data.ratetable = {
         "red":
           new Array(4).fill( [1, 0.1, 0.01] )
