@@ -30,6 +30,7 @@
           <div class="cell label"><label for="input-equipmentlevel">装備レベル:</label></div>
           <div class="cell label"><label for="input-potentialrank">潜在等級:</label></div>
           <div class="cell label"><label for="input-maxline">潜在行数:</label></div>
+          <div class="cell label"><label for="input-applyerrlist">重複制限:</label></div>
           <div class="cell label opt bottom"></div>
           
           <div class="cell input top"></div>
@@ -46,6 +47,8 @@
           <div class="cell input"><select id="input-maxline" class="input-status"               onchange="onchangesetting();" disabled>
             <option value="3" selected>3</option><option value="2">2</option><option value="1">1</option>
           </select></div>
+          <div class="cell input"><input id="input-applyerrlist" class="input-status"           onchange="onchangesetting();" type="checkbox" checked=true disabled></div>
+          
           <div class="cell input opt bottom"></div>
         </div>
         <div id="cubeinfodiv" class="grid" style="">
@@ -107,7 +110,9 @@
           <div id="potentialdiv" class="grid" style="">
             <div class="cell potential-head" style="grid-column: 1 / span 2;">
               <span>潜在能力</span>
-              <span><input type="range" id="input-potential-displayamount" step="1" min="0" max="2" style="min-width:50px; max-width:100px;" onchange="onchangedisplayamount();"></span>
+              <span style="background: linear-gradient(to bottom, #ddd 0%, #ddd 40%, #00f 40%, #00f 45%, #ddd 45%);">
+                <input type="range" id="input-potential-displayamount" step="1" min="0" max="2" style="min-width:50px; max-width:100px;" onchange="onchangedisplayamount();">
+              </span>
             </div>
             <div class="cell potential-head">Score</div>
             <div class="cell potential-head">確率</div>
