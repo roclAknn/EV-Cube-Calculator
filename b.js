@@ -26,6 +26,7 @@ window.selectedequipmenttype = -1;
 window.selectedequipmentlevel = -1;
 window.selectedrank = -1;
 window.selectedmaxline = -1;
+window.checkedapplyerrlist = true;
 
 /*===== ページロード後初期化処理 ===============================================*/
 function initialize(){
@@ -74,6 +75,8 @@ function UIinitialize(){
   sel = document.getElementById("input-maxline");
   sel.disabled = false;
   
+  sel = document.getElementById("input-applyerrlist");
+  sel.disabled = false;
   
   let div = document.getElementById("openerdiv");
   div.onclick = div.ontouch = function(){
@@ -158,6 +161,11 @@ function onchangesetting(){
   val = +document.getElementById("input-maxline").value;
   if( window.selectedmaxline != val ) flg2 = true;
   let maxline = window.selectedmaxline = val;
+  
+  /* 重複制限は潜在一覧出力には影響しない */
+  val = +document.getElementById("input-applyerrlist").checked;
+  if( window.checkedapplyerrlist != val ) flg2 = true;
+  let applyerrlist = window.checkedapplyerrlist = val
   
   if( eqp < 0 || lv < 0 || rank < 0 || maxline <= 0 ) return;
   
@@ -400,7 +408,8 @@ function createcubetable(){
       
       valdiv.innerHTML = trdata[1][1] || "";
       namediv.innerHTML = trdata[0];
-      ratediv.innerHTML = "" + (Math.round(trdata[2] * 100*10**4 / sumweight) / 10**4) + " %";
+      //ratediv.innerHTML = "" + (Math.round(trdata[2] * 100*10**4 / sumweight) / 10**4) + " %";
+      ratediv.innerHTML = "" + (trdata[2] * 100 / sumweight).toFixed(4) + " %";
       scorediv.innerHTML = `<input class="input-status no-spin input-score input-score-${trdata[4]}" type="number" oninput="oninputscore();">`;
       
       fragment.appendChild(valdiv);
@@ -452,11 +461,13 @@ function ondo(){
   let data     = window.selectedcube[1];
   let cubename = window.selectedcube[2];
   let maxline  = window.selectedmaxline;
+  let applyerrlist = window.checkedapplyerrlist;
   let rank = data.exportdata[0];
   let cuberankrate = data.ratetable[cubename][rank];
   let ws = [data.exportdata[1], data.exportdata[2]];
   
-  if(cubename == "hexa") maxline = 6;
+  let fixlinenum = data.fixlinenum[cubename];
+  if(fixlinenum > 0) maxline = fixlinenum;
   
   let inputscores = document.getElementsByClassName("input-score");
   
@@ -486,7 +497,7 @@ function ondo(){
     let w = wdata[0];
     let pid = wdata[1];
     let eid = errlist2[pid];
-    if( eid == undefined ) eid = -1;
+    if( !applyerrlist || eid == undefined ) eid = -1;
     let bool = true;
     for(let sc of scores){
       if(sc[0] == val && sc[2] == eid){
@@ -526,7 +537,11 @@ function ondo(){
   /* line=line～maxline-1の再帰処理 */
   function calc(line=0, maxline=3, erw ){
     let err = new BigNumber(0);
-    if( erw[2].length ){ /* line-1行までに制限潜在があれば制限処理 */
+    /*
+    * line-1行までに制限潜在があれば制限処理
+    * erw[2]にtrueを含むかの判定。truefalseを切り替えないのでlengthの確認で十分
+    */
+    if( erw[2].length ){
       /* line行で重複制限を引く(=この行を引き直す)確率 */
       err = erw[0][0].times( cuberankrate[line][0] ).plus( err );
       err = erw[0][1].times( cuberankrate[line][1] ).plus( err );
