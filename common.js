@@ -93,6 +93,7 @@ function initcubedatas(){
   
   regularKMS.init();
   additionalKMS.init();
+  regularTMS.init();
 }
 
 commons.createpotentialinfolist = function(data){
@@ -226,4 +227,20 @@ commons.createpotentialinfolist = function(data){
   }
   
   return list;
+}
+
+/*重み付け共通で作成したキューブデータベースへの対応*/
+/* pnum -> [pnum, pweight] */
+function convertcubedata(data){
+  for(let cubename in data.equipmentpotential){
+    let pweights = data.weights[cubename];
+    for(let eqp in data.equipmentpotential[cubename]){
+      for(let rank in data.equipmentpotential[cubename][eqp]){
+        let list = data.equipmentpotential[cubename][eqp][rank];
+        for(let i = 0; i < list.length; i++){
+          let pnum = list[i];
+          if(typeof pnum != "number") break;
+          list[i] = [pnum, pweights[pnum][rank]];
+        }
+  } } }
 }
