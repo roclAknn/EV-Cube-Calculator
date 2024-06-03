@@ -305,20 +305,23 @@ createTable.switch = function(type=-1){
         list2[v] = [ e05.div( Math.log( +one.minus(rr) ) ), e05.div( Math.log( one.minus(r) ))];
         break;
       case 4:
+        list2[v] = [rr, r];
+        break;
+      case 5:
         list2[v] = [rr.times(100), r.times(100)];
         break;
     }
   }
   list = list2;
   
-  let titlestr = ["確率[1/10000]", "平均値[個]", "50％ライン[個]", "95％ライン[個]", "確率[1/100]"]
+  let titlestr = ["確率[1/10000]", "平均値[個]", "50％ライン[個]", "95％ライン[個]", "確率[1/1]", "確率[1/100]"]
   
   
   let table = document.createElement("table");
   let tr = table.insertRow(0);
   tr.classList.add("coltitle");
   tr.innerHTML = `<td>Score</td><td>${titlestr[type]}(==Score)</td><td>${titlestr[type]}(>=Score)</td>`;
-  tr.onclick = tr.ontouch = createTable.switch.bind( createTable, (type+1)%5 );
+  tr.onclick = tr.ontouch = createTable.switch.bind( createTable, (type+1)%6 );
   trlist.length = 0;
   
   for (let i = 0; i < keys.length; i++) {
