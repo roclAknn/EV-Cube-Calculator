@@ -128,7 +128,14 @@ function onchangecube(){
 
 
 function onchangesetting(){
-  let val = +document.getElementById("input-cubetype").value;
+  let inputcube     = document.getElementById("input-cubetype");
+  let inputeqp      = document.getElementById("input-equipmenttype");
+  let inputeqplv   = document.getElementById("input-equipmentlevel");
+  let inputrank     = document.getElementById("input-potentialrank");
+  let inputmaxline  = document.getElementById("input-maxline");
+  let inputapplyerr = document.getElementById("input-applyerrlist");
+  
+  let val = +inputcube.value;
   if( val < 0 ) return;
   let flg = false;
   val = cubetypes[val];
@@ -138,37 +145,50 @@ function onchangesetting(){
     let temp = data.equipmentpotential[cubename];
     data = val[1];
     cubename = val[2];
-    if( temp != data.equipmentpotential[cubename] ) flg = true;
+    if( temp != data.equipmentpotential[cubename] )flg = true;
   }
   window.selectedcube = val;
   
   
-  val = +document.getElementById("input-equipmenttype").value;
+  val = +inputeqp.value;
   if( window.selectedequipmenttype != val ) flg = true;
   let eqp = window.selectedequipmenttype = val;
   
-  let input = document.getElementById("input-equipmentlevel");
-  val = input.validity.badInput ? -1 : +input.value;
-  toggleclass(input, "error", val < 0);
+  val = inputeqplv.validity.badInput ? -1 : +inputeqplv.value;
+  toggleclass(inputeqplv, "error", val < 0);
   if( window.selectedequipmentlevel != val ) flg = true;
-  let lv   = window.selectedequipmentlevel = val;
+  let eqplv = window.selectedequipmentlevel = val;
   
-  val = +document.getElementById("input-potentialrank").value;
+  val = +inputrank.value;
   if( window.selectedrank != val ) flg = true;
   let rank = window.selectedrank = val;
   
   /* 行数は潜在一覧出力には影響しない */
   let flg2 = false;
-  val = +document.getElementById("input-maxline").value;
-  if( window.selectedmaxline != val ) flg2 = true;
+  val = +inputmaxline.value;
+  if( window.selectedmaxline != val )flg2 = true;
   let maxline = window.selectedmaxline = val;
   
   /* 重複制限は潜在一覧出力には影響しない */
-  val = +document.getElementById("input-applyerrlist").checked;
+  val = +inputapplyerr.checked;
   if( window.checkedapplyerrlist != val ) flg2 = true;
   let applyerrlist = window.checkedapplyerrlist = val
   
-  if( eqp < 0 || lv < 0 || rank < 0 || maxline <= 0 ) return;
+  /*----------------------------------------------*/
+  
+  /* ユニキューブかそれ以外かでmaxlineの表示を切り替える(valueはそのまま) */
+  if( window.selectedcube ){
+    let cubename = window.selectedcube[2];
+    Array.apply(null, inputmaxline.options).forEach((k, i)=>{
+      if( cubename == "uni" ){
+        k.innerHTML = "" + (i + 1) + "行狙い";
+      }else{
+        k.innerHTML = "" + (3 - i) + "行";
+      }
+    });
+  }
+  
+  if( eqp < 0 || eqplv < 0 || rank < 0 || maxline <= 0 ) return;
   
   conditionupdate(); /* 出力条件の表示 */
   if( flg ){
@@ -283,7 +303,7 @@ createTable.switch = function(type=-1){
     
     /* ユニキューブは潜在行数を行選択確率として使う */
     if(cubename == "uni"){
-      rr = rr.times(+linenum).div(3);
+      rr = rr.times(3-linenum+1).div(3);
     }
     
     r = r.plus(rr);
