@@ -439,6 +439,7 @@ function createcubetable(){
       valdiv.className = `gridbox1 cell ${commons.rankclassnames[rank]}`;
       valdiv.dataset.potentialdepth = trdata[3];
       
+      let autodiv = valdiv.cloneNode();
       let namediv = valdiv.cloneNode();
       let scorediv = valdiv.cloneNode();
       let ratediv = valdiv.cloneNode();
@@ -452,8 +453,25 @@ function createcubetable(){
       namediv.innerHTML = trdata[0];
       //ratediv.innerHTML = "" + (Math.round(trdata[2] * 100*10**4 / sumweight) / 10**4) + " %";
       ratediv.innerHTML = "" + (trdata[2] * 100 / sumweight).toFixed(4) + " %";
-      scorediv.innerHTML = `<input class="input-status no-spin input-score input-score-${trdata[4]}" type="number" oninput="oninputscore();">`;
       
+      
+      let input = document.createElement("input");
+      input.autoinput = trdata[1][1] || 1;
+      input.type      = "number";
+      input.className = `input-status no-spin input-score input-score-${trdata[4]}`;
+      input.oninput   = oninputscore;
+      scorediv.appendChild(input);
+      
+      autodiv.classList.add("potential-auto");
+      let button = document.createElement("input");
+      button.type      = "button";
+      button.value     = ">";
+      button.style.zIndex = "10000";
+      button.onclick   = onautoinput;
+      button.score     = input;
+      autodiv.appendChild(button);
+      
+      fragment.appendChild(autodiv);
       fragment.appendChild(valdiv);
       fragment.appendChild(namediv);
       fragment.appendChild(scorediv);
@@ -478,7 +496,17 @@ function oninputscore(){
   }, oninputscore.delay);
 }
 
+function onautoinput(){
+  let score = this.score;
+  if( score.value != score.autoinput ){
+    score.value = score.autoinput;
+    score.oninput();
+  }
+}
+
 function onchangedisplayamount(){
+  const cellnum = 5;
+  
   let divs = document.querySelectorAll(`#potentialdiv div[data-potentialdepth]`)
   if(divs.length <= 0) return;
   
@@ -489,8 +517,8 @@ function onchangedisplayamount(){
     e.style.display = (d <= val) ? "" : "none";
     if (d > val) continue;
     visiblenum++;
-    e.classList[ (~~((visiblenum-1) / 4)) % 2 == 0 ? "remove" : "add" ]("masked");
-    toggleclass(e, "masked", (~~((visiblenum-1) / 4)) % 2 == 1);
+    e.classList[ (~~((visiblenum-1) / cellnum)) % 2 == 0 ? "remove" : "add" ]("masked");
+    toggleclass(e, "masked", (~~((visiblenum-1) / cellnum)) % 2 == 1);
   }
   createTable(ondo());
 }
