@@ -469,7 +469,9 @@ function createcubetable(){
       button.style.zIndex = "10000";
       button.onclick   = onautoinput;
       button.score     = input;
+      button.inittext  = valdiv.innerHTML + namediv.innerHTML;
       autodiv.appendChild(button);
+      input.autobutton   = button;
       
       fragment.appendChild(autodiv);
       fragment.appendChild(valdiv);
@@ -482,6 +484,14 @@ function createcubetable(){
 
 oninputscore.delay = 1000;
 function oninputscore(){
+  if( this.validity.badInput || this.value.length > 0 ){
+    this.autobutton.classList.add("delete");
+    this.autobutton.value = "x";
+  }else{
+    this.autobutton.classList.remove("delete");
+    this.autobutton.value = ">";
+  }
+  
   /* ヘキサキューブのみ重いので、スコアの入力がしやすいよう即時反映せずに遅延させる */
   let cubename = window.selectedcube[2];
   if( cubename != "hexa" ){
@@ -497,11 +507,31 @@ function oninputscore(){
 }
 
 function onautoinput(){
+  
   let score = this.score;
-  if( score.value != score.autoinput ){
+  //遅延処理の場合に対応できないのでerrorクラスで判定しない
+  let sc = score.validity.badInput ? -1 : +score.value;
+  
+  if( this.classList.contains("delete") ){
+    //入力済みの場合は削除ボタン
+    let bool = true;
+    if( sc > 0 && sc != score.autoinput ){
+      if( window.isconfirm ) return;
+      window.isconfirm = true;
+      bool = confirm("このスコアを未入力にします\n[ " + this.inittext + " ] = " + sc);
+      window.isconfirm = false;
+    }
+    if( bool ){
+      this.value = ">";
+      score.value = "";
+      score.oninput();
+    }
+  }else if( sc != score.autoinput ){
+    //未入力の場合は自動入力ボタン
     score.value = score.autoinput;
     score.oninput();
   }
+  
 }
 
 function onchangedisplayamount(){
