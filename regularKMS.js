@@ -355,6 +355,8 @@ regularKMS.init = function(){
   
       /*------------------- 無償キューブ装備別潜在 -------------------------------------------------------*/
       let temp = data.equipmentpotential.red;
+      temp = JSON.parse(JSON.stringify(temp));
+      
       list = [];
         data.equipmentpotential["occult"]
       = data.equipmentpotential["craftman"]
