@@ -22,6 +22,8 @@ const cubegroups = [
 , ["その他", [7, 8]]
 ];
 
+const tempeqplv = [250, 200, 160, 150, 140, 130, 120, 110, 100, 0];
+
 window.selectedcube = null;
 window.selectedequipmenttype = -1;
 window.selectedequipmentlevel = -1;
@@ -63,6 +65,7 @@ function UIinitialize(){
   sel.disabled = false;
   
   sel = document.getElementById("input-equipmentlevel");
+  sel.parentElement.appendChild( createDropdown(sel, tempeqplv, onchangesetting) );
   sel.disabled = false;
   
   sel = document.getElementById("input-potentialrank");
@@ -552,6 +555,64 @@ function onchangedisplayamount(){
   }
   createTable(ondo());
 }
+
+
+/* 引数のinput要素に対応した入力補助用のプルダウンを生成して返す(配置はしない) */
+function createDropdown(inputElement, items, callback) {
+  // メインのdivを作成
+  let container = document.createElement('div');
+  container.className = 'button-dropdown-wrapper';
+
+  // プルダウンメニューを作成
+  let dropdown = document.createElement('div');
+  dropdown.className = 'template-dropdown';
+
+  // リストを作成
+  let ul = document.createElement('ul');
+  items.forEach(item => {
+    let li = document.createElement('li');
+    li.textContent = item;
+
+    // 項目をクリックしたときの処理
+    li.addEventListener('click', function() {
+      inputElement.value = item; // 入力欄に反映
+      dropdown.style.display = 'none'; // メニューを閉じる
+      if(callback) callback();
+    });
+
+    ul.appendChild(li);
+  });
+
+  dropdown.appendChild(ul);
+
+  // ボタンを作成
+  let button = document.createElement('button');
+  button.textContent = '▼';
+
+  // ボタンをクリックしたときの処理
+  button.addEventListener('click', function(event) {
+    event.stopPropagation(); // 他のクリックイベントをキャンセル
+    dropdown.style.display = dropdown.style.display === 'block' ? 'none' : 'block'; // メニューの表示/非表示切替
+  });
+
+  // コンテナにボタンとドロップダウンを追加
+  container.appendChild(button);
+  container.appendChild(dropdown);
+
+  return container; // 生成した要素を返す(配置はしない)
+}
+
+// 領域外クリックでプルダウンメニューを閉じる処理
+document.addEventListener('click', closeDropdowns);
+function closeDropdowns(event) {
+  let dropdowns = document.querySelectorAll('.template-dropdown');
+  dropdowns.forEach(dropdown => {
+    dropdown.style.display = 'none'; // 全てのプルダウンを閉じる
+  });
+}
+
+
+
 
 
 

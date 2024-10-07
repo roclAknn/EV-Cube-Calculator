@@ -152,6 +152,10 @@ div.grid {
 
 /*------------------------------------------------------*/
 
+.no-spin::-webkit-inner-spin-button,
+.no-spin::-webkit-outer-spin-button {
+  -webkit-appearance: none;
+}
 .no-spin {
   margin: 0;
   -moz-appearance: textfield;
@@ -165,6 +169,8 @@ div.grid {
 
 input.input-status {
   width: 40px;
+  height: 20px;
+  padding: 1px 4px;
 }
 input[type="checkbox"].input-status {
   width: unset;
@@ -176,6 +182,8 @@ select.input-status {
   max-width: 100px;
   -webkit-appearance: none;
   appearance: none;
+  height: 24px;
+  padding: 1px 4px;
 }
 
 select.input-status::-ms-expand {
@@ -301,7 +309,8 @@ input.error {
   position: relative;
   z-index: 30000;
   height: 21px;
-  padding: 0px;
+  width: 30px;
+  padding: 0px 4px;
   margin: 0px;
   border: solid 1px gray;
 }
@@ -331,5 +340,46 @@ input.error {
 }
 
 
+/*-------- 生成プルダウン ------------------------*/
+.button-dropdown-wrapper {
+  display: inline-block;
+}
 
+.button-dropdown-wrapper>button {
+  background-color: #eee;
+  border: 1px solid #ccc;
+  cursor: pointer;
+  padding: 1px;
+  font-size: 10px;
+  height: 24px;
+  width: 24px;
+  margin-left: 1px;
+}
+
+.template-dropdown {
+  display: none;
+  position: absolute;
+  border: 1px solid #ccc;
+  background-color: #fff;
+  box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
+  z-index: 50000;
+  width: auto; /* 項目の文字列幅に基づく最小幅 */
+  white-space: nowrap; /* テキストを1行に収める */
+}
+
+.template-dropdown ul {
+  list-style-type: none;
+  padding: 0;
+  margin: 0;
+}
+
+.template-dropdown li {
+  padding: 8px;
+  cursor: pointer;
+  text-align: right;
+}
+
+.template-dropdown li:hover {
+  background-color: #f0f0f0;
+}
 
