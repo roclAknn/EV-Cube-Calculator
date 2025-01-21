@@ -8,6 +8,11 @@ body {
   max-width: 780px;
 }
 
+header {
+  display: flex;
+  justify-content: space-between;
+}
+
 table {
   border-collapse: collapse;
 }
@@ -52,10 +57,10 @@ div.grid {
   align-items: center;
 }
 #settingdiv .cell.label{
-  justify-content: end;
+  justify-content: flex-end;
 }
 #settingdiv .cell.input{
-  justify-content: start;
+  justify-content: flex-start;
 }
 
 #cubeinfodiv {
@@ -283,7 +288,7 @@ input.error {
 #potentialdiv .potential-val{
   padding-left: 10px;
   padding-right: 5px;
-  justify-content: end;
+  justify-content: flex-end;
 }
 
 #potentialdiv .potential-name{
@@ -296,7 +301,7 @@ input.error {
 }
 #potentialdiv .potential-rate{
   padding-right: 10px;
-  justify-content: end;
+  justify-content: flex-end;
 }
 
 #potentialdiv div {
