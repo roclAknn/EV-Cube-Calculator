@@ -34,34 +34,36 @@
           <div class="cell label"><label for="input-equipmentlevel">装備レベル:</label></div>
           <div class="cell label"><label for="input-potentialrank">潜在等級:</label></div>
           <div class="cell label"><label for="input-maxline">潜在行数:</label></div>
-          <div class="cell label"><label for="input-applyerrlist">重複制限:</label></div>
+          <div class="cell label hide"><label for="input-applyerrlist">重複制限:</label></div>
           <div class="cell label opt bottom"></div>
           
           <div class="cell input top"></div>
-          <div class="cell input"><select id="input-cubetype" class="input-status"              onchange="onchangecube();" disabled>
-            <option value="-1" hidden>未選択</option>
+          <div class="cell input"><select id="input-cubetype" class="input-status"              onchange="onchangecube();" required disabled>
+            <option value="" hidden>未選択</option>
           </select></div>
-          <div class="cell input"><select id="input-equipmenttype" class="input-status"         onchange="onchangesetting();" disabled>
-            <option value="-1" hidden>未選択</option>
+          <div class="cell input"><select id="input-equipmenttype" class="input-status"         onchange="onchangesetting();" required disabled>
+            <option value="" hidden>未選択</option>
           </select></div>
           <div class="cell input"><input id="input-equipmentlevel" class="input-status no-spin" oninput="onchangesetting();" value="200" type="number" disabled></div>
-          <div class="cell input"><select id="input-potentialrank" class="input-status"         onchange="onchangesetting();" disabled>
-            <option value="-1" hidden>未選択</option>
+          <div class="cell input"><select id="input-potentialrank" class="input-status"         onchange="onchangesetting();" required disabled>
+            <option value="" hidden>未選択</option>
           </select></div>
           <div class="cell input"><select id="input-maxline" class="input-status"               onchange="onchangesetting();" disabled>
             <option value="3" selected>3行</option><option value="2">2行</option><option value="1">1行</option>
           </select></div>
-          <div class="cell input"><input id="input-applyerrlist" class="input-status"           onchange="onchangesetting();" type="checkbox" disabled></div>
+          <div class="cell input hide"><input id="input-applyerrlist" class="input-status"           onchange="onchangesetting();" type="checkbox" disabled></div>
           
           <div class="cell input opt bottom"></div>
         </div>
         <div id="cubeinfodiv" class="grid" style="">
           <div class="cell left head top"></div>
-          <div class="cell left head" id="cubeimagediv"></div>
-          <div class="cell left head">１行目同等級</div>
-          <div class="cell left head">２行目同等級</div>
-          <div class="cell left head">３行目同等級</div>
-          <div class="cell left head">等級上昇</div>
+          <div class="cell left head" id="cubeimagediv">
+            <img class="cubeimage" src="./images/cubes.png">
+          </div>
+          <div class="cell left head">1行目<br>上級</div>
+          <div class="cell left head">2行目<br>上級</div>
+          <div class="cell left head">3行目<br>上級</div>
+          <div class="cell left head">等級<br>上昇</div>
           <div class="cell left head bottom"></div>
           
           <div class="cell legendary top"></div>
@@ -98,24 +100,84 @@
         </div>
       </div>
       <div id="openerdiv">
-        <div class="wrapdiv" style="margin: 0px 50px 0px 10px; position: relative;">
+        <div class="wrapdiv" style="position: relative;">
           <div class="arrowdiv"></div>
         </div>
         <div id="conditiondiv" class="grid">
-          <div id="condition-cube"></div>
-          <div id="condition-eqp"></div>
+          <div id="condition-cube">
+            <img class="cubeimage" src="./images/cubes.png">
+          </div>
+          <div id="condition-eqp">
+            <img class="eqpimage" src="./images/equipments.png">
+          </div>
           <div id="condition-level"></div>
-          <div id="condition-rank"></div>
-          <div id="condition-date"></div>
+          <div id="condition-rank" style="text-align: left; padding-left: 6px;"></div>
+          <div id="exporttype1div" style="align-content: center;"></div>
+          <select id="exporttype1" hidden></select>
+          <div id="exporttype2div" style="align-content: center;"></div>
+          <select id="exporttype2" hidden></select>
         </div>
       </div>
+      <script>
+        {
+          /* exporttype1,2の処理 */
+          const exporttype1div = document.getElementById("exporttype1div");
+          const exporttype1 = document.getElementById("exporttype1");
+          const exporttype1names  = ["平均消費数[個]", "50%ライン[個]", "95%ライン[個]", "確率[1/1]", "確率[1/100]", "確率[1/10000]"];
+          const exporttype1values = ["numavg", "num50", "num95", "prob1", "prob100", "prob10000"];
+          const exporttype2div = document.getElementById("exporttype2div");
+          const exporttype2 = document.getElementById("exporttype2");
+          const exporttype2names  = ["スコア以上", "スコア一致"];
+          const exporttype2values = [">=", "=="];
+          
+          let inner = `<optgroup>`;
+          exporttype1names.forEach((name, idx)=>{
+            let value = exporttype1values[idx];
+            inner += `<option value="${value}" label="${name}" ${idx==0 ? "selected" : ""}></option>`;
+          });
+          inner += `</optgroup>`;
+          exporttype1.innerHTML = inner;
+          
+          inner = `<optgroup>`;
+          exporttype2names.forEach((name, idx)=>{
+            let value = exporttype2values[idx];
+            inner += `<option value="${value}" label="${name}" ${idx==0 ? "selected" : ""}></option>`;
+          });
+          inner += `</optgroup>`;
+          exporttype2.innerHTML = inner;
+          
+          // 読み込み時に同期
+          let idx = exporttype1.selectedIndex;
+          exporttype1div.innerHTML = exporttype1.selectedOptions[0].label;
+          idx = exporttype2.selectedIndex;
+          exporttype2div.innerHTML = exporttype2.selectedOptions[0].label;
+          exporttype1div.onclick = function(){
+            exporttype1.selectedIndex = (exporttype1.selectedIndex + 1) % exporttype1.length;
+            exporttype1div.innerHTML = exporttype1.selectedOptions[0].label;
+            // テーブル切り替え処理
+            createTable.switch();
+          }
+          exporttype2div.onclick = function(){
+            exporttype2.selectedIndex = (exporttype2.selectedIndex + 1) % exporttype2.length;
+            exporttype2div.innerHTML = exporttype2.selectedOptions[0].label;
+            // テーブル切り替え処理
+            createTable.switch();
+          }
+        }
+      </script>
       <div id="exportdiv" class="grid" style="">
         <div class="wrapdiv">
           <div id="potentialdiv" class="grid" style="">
             <div class="cell potential-head" style="grid-column: 1 / span 3;">
               <span>潜在能力</span>
               <span>
-                <input type="range" id="input-potential-displayamount" step="1" min="0" max="2" style="min-width:50px; max-width:100px;" onchange="onchangedisplayamount();">
+                <input type="range" id="input-potential-displayamount" step="1" min="0" max="2" style="min-width:50px; max-width:100px; display: none;" onchange="onchangedisplayamount();">
+                <div class="slider-container" id="slider-container">
+                  <div class="slider-fill" id="slider-fill"></div>
+                  <div class="knob" id="knob">
+                    <div class="inner-circle"></div>
+                  </div>
+                </div>
               </span>
             </div>
             <div class="cell potential-head">Score</div>
@@ -127,6 +189,65 @@
         </div>
       </div>
     </main>
+    <script>
+      {
+        // 潜在能力表示量の調整つまみの動作処理
+        const input = document.getElementById("input-potential-displayamount");
+        const container = input.parentElement;
+        const knob   = container.getElementsByClassName("knob")[0];
+        const fill   = container.getElementsByClassName("slider-fill")[0];
+        const slider = container.getElementsByClassName("slider-container")[0];
+        const margin = 5;
+        const positions = [0+margin, 50, 100-margin];
+        let positionIndex = 1;
+        let isDragging = false;
+        updateKnobPosition();
+        
+        slider.addEventListener("click", moveKnob);
+        slider.addEventListener("mousedown", startDrag);
+        slider.addEventListener("touchstart", startDrag);
+        
+        function startDrag(event) {
+            endDrag(); // 重複登録を防ぐ
+            isDragging = true;
+            document.addEventListener("mousemove", dragKnob);
+            document.addEventListener("mouseup", endDrag);
+            document.addEventListener("touchmove", dragKnob);
+            document.addEventListener("touchend", endDrag);
+            document.addEventListener("dragend", endDrag); // mouseupが発生しない場合の終了処理
+        }
+        function endDrag(event) {
+            isDragging = false;
+            document.removeEventListener("mousemove", dragKnob);
+            document.removeEventListener("mouseup", endDrag);
+            document.removeEventListener("touchmove", dragKnob);
+            document.removeEventListener("touchend", endDrag);
+            document.removeEventListener("dragend", endDrag);
+        }
+        function dragKnob(event) {
+            if (!isDragging ) return;
+            moveKnob(event);
+        }
+        function moveKnob(event) {
+            const clientX = event.touches ? event.touches[0].clientX : event.clientX;
+            if ( clientX == 0 ) return;
+            const rect = slider.getBoundingClientRect();
+            let offsetX = clientX - rect.left;
+            let stepWidth = rect.width / 3;
+            // console.log([rect.width, clientX - rect.left], [stepWidth, offsetX]);
+            positionIndex = Math.min(2, Math.max(0, Math.floor(offsetX / stepWidth)));
+            updateKnobPosition();
+        }
+        
+        function updateKnobPosition() {
+            knob.style.left = positions[positionIndex] + "%";
+            knob.style.transform = "translateX(-50%)";
+            fill.style.width = positions[positionIndex] + "%";
+            input.value = positionIndex;
+            input.onchange();
+        }
+      }
+    </script>
   
 
     <footer>

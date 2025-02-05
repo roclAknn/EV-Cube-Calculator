@@ -3,9 +3,11 @@
 
 body {
   font-family: Arial, sans-serif, serif;
-  padding: 0px 14px 0px;
-  min-width: 640px;
+  min-width: 520px;
   max-width: 780px;
+  margin: 10px;
+  background: #f0f0f0;
+  color: #333;
 }
 
 header {
@@ -31,6 +33,12 @@ div.grid {
 #maindiv {
   grid-auto-flow: row;
   grid-template-columns: 1fr;
+  background: #fff6f0;
+  border: 2px solid #333;
+  border-radius: 10px 10px 0px 0px;
+  width: fit-content;
+  height: fit-content;
+  overflow: hidden;
 }
 
 #headerdiv {
@@ -39,7 +47,6 @@ div.grid {
   height: 270px;
   overflow: hidden;
   transition-duration: 0.3s;
-  border-top: 8px solid #ccc;
 }
 #headerdiv.hide {
   height: 0px !important;;
@@ -47,46 +54,54 @@ div.grid {
 
 #settingdiv {
   grid-auto-flow: column;
-  /*grid-template-rows: 0px repeat(5, 50px) 20px;*/
-  grid-template-rows: 0px repeat(6, 44px) 20px;
+  grid-template-rows: 0px repeat(5, 1fr) 20px;
+  /* grid-template-rows: 0px repeat(6, 1fr) 20px; 重複制限を表示する場合 */
+  height: 270px;
   width: 240px;
+  border-right: 2px solid #333;
 }
 
 #settingdiv .cell{
   display: flex;
   align-items: center;
 }
+#settingdiv .cell.hide{
+  display: none;
+}
 #settingdiv .cell.label{
   justify-content: flex-end;
+  font-weight: bold;
 }
 #settingdiv .cell.input{
   justify-content: flex-start;
 }
 
-#cubeinfodiv {
-  grid-auto-flow: column;
-  grid-template-rows: 5px repeat(5, 53px) 0px;
-}
-
 #openerdiv {
-  height: 30px;
+  height: 40px;
   display: flex;
   align-items: center;
-  background: linear-gradient(180deg, #ccc 0%, #eee 20%, #eee 80%, #ccc 100%);
+  border-top: 2px solid #333;
+}
+
+#openerdiv .wrapdiv{
+  margin: 0px 10px;
+  width: 30px;
+  height: 30px;
 }
 
 #openerdiv .arrowdiv {
   position: absolute;
-  top: -7px;
   height: 15px;
   width: 15px;
-  transform: rotate(-45deg);
-  transform-origin: calc(550%/8) calc(250%/8);
-  transition-duration: 0.3s;
   border-color: black black transparent transparent;
   border-style: solid;
   border-width: 3px;
   border-radius: 15%;
+  top: calc(50% - (21px*0.27));
+  left: calc(50% - (21px*0.73));
+  transform-origin: calc(21px*0.73) calc(21px*0.27);
+  transform: rotate(-45deg);
+  transition: 0.3s linear;
 }
 
 #openerdiv.opener .arrowdiv {
@@ -95,15 +110,16 @@ div.grid {
 
 #openerdiv #conditiondiv {
   grid-auto-flow: column;
-  grid-template-columns: repeat(5, auto);
+  grid-template-columns: 70px 70px 70px 1fr auto auto;
+  height: 38px;
   width: 100%;
+  font-weight: bold;
 }
 #openerdiv #conditiondiv>div {
-  min-width: 120px;
   white-space: nowrap;
   overflow: hidden;
-  margin-right: 5px;
   text-align: center;
+  align-content: center;
 }
 #openerdiv #conditiondiv #condition-date {
   max-width: 100px;
@@ -114,7 +130,12 @@ div.grid {
 
 #exportdiv {
   grid-auto-flow: row;
-  grid-template-columns: 1fr 1fr;
+  grid-template-columns: auto 1fr;
+  border: solid #333;
+  border-width: 2px 0px 0px 0px;
+}
+#exportdiv .wrapdiv:first-child{
+  min-width: 313px;
 }
 
 #potentialdiv {
@@ -128,10 +149,7 @@ div.grid {
 
 /* gridboxの背景色 */
 #settingdiv{
-  background-color: #ffcece;
-}
-#settingdiv .cell {
-  background-color: #ffffffa0;
+  background-color: #ffe0ee;
 }
 
 /* gridboxのpaddingレイアウト */
@@ -190,6 +208,9 @@ select.input-status {
   height: 24px;
   padding: 1px 4px;
 }
+select.input-status:invalid{ /* 未選択状態 */
+  border-bottom: double 4px #f88;
+}
 
 select.input-status::-ms-expand {
   display: none;
@@ -205,13 +226,27 @@ select.input-status::-ms-expand {
   background-color: #efefef;
   min-width: 100%;
 }
-#tablediv td {
-  max-width: 160px;
-  overflow: hidden;
+#tablediv td:first-child{
+  width: 0px; /* fit-content */
 }
-#tablediv .coltitle {
-  background-color: #d0d0d0;
+#tablediv td {
+  overflow: hidden;
+  white-space: nowrap;
+  border-width: 0px 0px 1px 1px;
+}
+#tablediv tr.coltitle {
+  background: #f66;
+  font-weight: bold;
+  color: white;
   font-size: 14px;
+  height: 25px;
+  white-space: nowrap;
+}
+#tablediv tr{
+  background: #fff;
+}
+#tablediv tr:nth-of-type(2n){
+  background: #fff0f0;
 }
 #tablediv span.decimal {
   font-size: 12px;
@@ -238,11 +273,20 @@ input.error {
   background-color: #ffdddd;
 }
 
+#cubeinfodiv {
+  grid-auto-flow: column;
+  grid-template-columns: 72px repeat(4, 1fr);
+  grid-template-rows: 0px auto repeat(4, 50px) 0px;
+}
 #cubeinfodiv div.none {
   background-color: #eeeeee;
 }
 #cubeinfodiv .cell {
   border-bottom: solid 1px #bbbbbb;
+  text-align: right;
+  align-content: center;
+  padding: 0px 8px;
+  max-height: 70px;
 }
 #cubeinfodiv div:nth-of-type(7n-1) {
   border-bottom: none;
@@ -255,17 +299,21 @@ input.error {
 , #cubeinfodiv .head.top{
   background-color: #CFD8E7;
 }
+.cubeimage, .eqpimage{
+  object-fit: none;
+  object-position: 50% 0px;
+  display: none; /* 未選択状態では非表示 */
+  width: 100%;
+}
+.cubeimage{
+  height: 32px;
+}
+.eqpimage{
+  height: 38px;
+}
 #cubeinfodiv .head{
   background-color: #fafafa;
 }
-#cubeinfodiv {
-  grid-template-columns: repeat(5, 1fr);
-}
-#cubeinfodiv #cubeimagediv{
-  background-repeat: no-repeat;
-  background-position: 50%;
-}
-
 
 #potentialdiv .potential-auto>input{
   height: 100%;
@@ -319,15 +367,8 @@ input.error {
   margin: 0px;
   border: solid 1px gray;
 }
-#potentialdiv .masked::before {
-  z-index: 1000;
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background-color: rgba(0,0,0,0.03);
+#potentialdiv .masked {
+  background-image: linear-gradient(rgba(255,255,255,.4), rgba(255,255,255,.4)); /* 背景色に白を重ねる */
 }
 
 #potentialdiv * {
@@ -335,13 +376,18 @@ input.error {
   overflow: hidden;
 }
 #potentialdiv .potential-head {
-  background-color: #d0d0d0;
   justify-content: center;
   min-width:50px;
   height: 25px;
   padding: 3px 0px;
-  border: solid 1px #888;
-  border-right: none;
+  border: solid #888;
+  border-width: 0px 0px 1px 1px;
+  background: #f66;
+  font-weight: bold;
+  color: white;
+}
+#potentialdiv .potential-head:first-child {
+  border-left: 0px;
 }
 
 
@@ -388,3 +434,58 @@ input.error {
   background-color: #f0f0f0;
 }
 
+/* つまみ付きゲージ（見た目を共通化するため） */
+#potentialdiv .slider-container {
+    position: relative;
+    width: 80px;
+    height: 6px;
+    margin: 10px 10px;
+    background-color: #ddd;
+    border: solid 1px #333;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    overflow: visible;
+    cursor: pointer;
+}
+#potentialdiv .slider-fill {
+    position: absolute;
+    height: 100%;
+    background-color: #88f;
+    border-radius: 8px 0 0 8px;
+    width: 0%;
+}
+#potentialdiv .knob {
+    position: absolute;
+    width: 19px;
+    height: 19px;
+    background-color: white;
+    border: 1px solid #333;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+#potentialdiv .inner-circle {
+    width: 13px;
+    height: 13px;
+    background-color: #555;
+    border-radius: 50%;
+}
+
+
+/* 出力テーブル切り替えボタン */
+#exporttype1div
+, #exporttype2div{
+  align-self: center;
+  align-content: center;
+  cursor: pointer;
+  background: #f9f9f9;
+  color: #555;
+  font-weight: bold;
+  border: 2px #555 solid;
+  border-radius: 5px;
+  padding: 0px 6px;
+  margin: 0px 6px 0px 0px;
+  height: 30px;
+}

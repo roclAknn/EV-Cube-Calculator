@@ -2,17 +2,17 @@
 
 
 const cubetypes = [
-  ["KMS/レッドキューブ",   regularKMS, "red"]
-, ["KMS/ブラックキューブ", regularKMS, "black"]
-, ["KMS/名匠のキューブ", regularKMS, "meister"]
-, ["KMS/職人のキューブ", regularKMS, "craftman"]
-, ["KMS/怪しいキューブ", regularKMS, "occult"]
+  ["KMS/レッドキューブ",   regularKMS, "red", 0]
+, ["KMS/ブラックキューブ", regularKMS, "black", 1]
+, ["KMS/名匠のキューブ", regularKMS, "meister", 2]
+, ["KMS/職人のキューブ", regularKMS, "craftman", 3]
+, ["KMS/怪しいキューブ", regularKMS, "occult", 4]
 
-, ["KMS/アディショナル・ホワイトアディショナルキューブ", additionalKMS, "additional"]
-, ["KMS/怪しいアディショナルキューブ", additionalKMS, "rareadditional"]
+, ["KMS/アディショナル・ホワイトアディショナルキューブ", additionalKMS, "additional", 5]
+, ["KMS/怪しいアディショナルキューブ", additionalKMS, "rareadditional", 6]
 
-, ["TMS/ユニキューブ", regularTMS, "uni"]
-, ["非公式/ヘキサキューブ(KMS無償テーブル)", regularKMS, "hexa"]
+, ["TMS/ユニキューブ", regularTMS, "uni", 7]
+, ["非公式/ヘキサキューブ(KMS無償テーブル)", regularKMS, "hexa", 8]
 ];
 
 const cubegroups = [
@@ -82,43 +82,31 @@ function UIinitialize(){
   sel = document.getElementById("input-applyerrlist");
   sel.disabled = false;
   
-  let div = document.getElementById("openerdiv");
+  let div = document.querySelector("#openerdiv>.wrapdiv");
   div.onclick = div.ontouch = function(){
     let div = document.getElementById("headerdiv");
-    let ishide = toggleclass(div, "hide");
+    let ishide = div.classList.toggle("hide");
     div = document.getElementById("openerdiv");
-    toggleclass(div, "opener", ishide);
+    div.classList.toggle("opener", ishide);
   };
   
   createTable([]);
 }
 
-function toggleclass(element, cn, force=-1){
-  let ret = false;
-  let c = element.classList;
-  if( force < 0 ){
-    ret = !c.contains(cn);
-  }else{
-    ret = force;
-  }
-  c[ ret ? "add" : "remove"](cn);
-  return ret;
-}
-
 function onchangecube(){
   /* window.selectedcubeはここで更新しないこと */
-  let val = +document.getElementById("input-cubetype").value;
-  if( val < 0 ) return;
-  val = cubetypes[val];
+  let val = document.getElementById("input-cubetype").value;
+  if( val === "" ) return;
+  val = cubetypes[+val];
   let data = val[1];
   let cubename = val[2];
   let ratetable = data.ratetable[cubename];
   
   let sel = document.getElementById("input-potentialrank");
   for( let opt of sel.options ){
-    let val = +opt.value;
-    if( val < 0) continue;
-    if( ratetable[val] ){
+    let val = opt.value;
+    if( val === "") continue;
+    if( ratetable[+val] ){
       opt.disabled = false;
     }else{
       opt.disabled = true;
@@ -138,33 +126,35 @@ function onchangesetting(){
   let inputmaxline  = document.getElementById("input-maxline");
   let inputapplyerr = document.getElementById("input-applyerrlist");
   
-  let val = +inputcube.value;
-  if( val < 0 ) return;
+  let val = inputcube.value;
+  if( val === "" ) return;
   let flg = false;
-  val = cubetypes[val];
+  val = cubetypes[+val];
   if( window.selectedcube ){
     let data = window.selectedcube[1];
     let cubename = window.selectedcube[2];
     let temp = data.equipmentpotential[cubename];
     data = val[1];
     cubename = val[2];
-    if( temp != data.equipmentpotential[cubename] )flg = true;
+    if( temp != data.equipmentpotential[cubename] ) flg = true;
   }
   window.selectedcube = val;
   
   
-  val = +inputeqp.value;
-  if( window.selectedequipmenttype != val ) flg = true;
-  let eqp = window.selectedequipmenttype = val;
+  val = inputeqp.value;
+  if( val === "" ) val = -1;
+  if( window.selectedequipmenttype != +val ) flg = true;
+  let eqp = window.selectedequipmenttype = +val;
   
   val = inputeqplv.validity.badInput ? -1 : +inputeqplv.value;
-  toggleclass(inputeqplv, "error", val < 0);
+  inputeqplv.classList.toggle("error", val < 0);
   if( window.selectedequipmentlevel != val ) flg = true;
   let eqplv = window.selectedequipmentlevel = val;
   
-  val = +inputrank.value;
-  if( window.selectedrank != val ) flg = true;
-  let rank = window.selectedrank = val;
+  val = inputrank.value;
+  if( val === "" ) val = -1;
+  if( window.selectedrank != +val ) flg = true;
+  let rank = window.selectedrank = +val;
   
   /* 行数は潜在一覧出力には影響しない */
   let flg2 = false;
@@ -202,32 +192,36 @@ function onchangesetting(){
   
 }
 
+/* 表示中の設定の表示更新 */
 function conditionupdate(){
-  let name = window.selectedcube[0];
+  let cubeimagenum = window.selectedcube[3];
   let eqp = window.selectedequipmenttype;
   let lv = window.selectedequipmentlevel;
   let rank = window.selectedrank;
-  let date = window.selectedcube[1].date;
   
-  document.getElementById("condition-cube").innerHTML = name;
-  document.getElementById("condition-eqp").innerHTML = commons.equipmentnames[eqp];
+  const cubeimage = document.querySelector("#condition-cube .cubeimage");
+  cubeimage.style.display = "block";
+  cubeimage.style.objectPosition = `50% ${-32 * cubeimagenum}px`;
+  const eqpimage = document.querySelector("#condition-eqp .eqpimage");
+  eqpimage.style.display = "block";
+  eqpimage.style.objectPosition = `50% ${-38 * eqp}px`;
   document.getElementById("condition-level").innerHTML = "Lv." + lv;
   document.getElementById("condition-rank").innerHTML = commons.ranknames[rank];
-  document.getElementById("condition-date").innerHTML = date.toLocaleDateString();
 }
 
 function setcubeinfodiv(){
   let data = window.selectedcube[1];
   let cubename = window.selectedcube[2];
+  let cubeimagenum = window.selectedcube[3];
   let ratetable = data.ratetable[cubename];
   let upgtable  = data.upgradetable[cubename];
   
   /* ヘキサキューブの確率を強引に表示する */
   if( cubename == "hexa" ){
     let newtable = [
-        [["1行目同等級"], ["2行目同等級"], ["3行目同等級"]]
+        [["1行目上級"], ["2行目上級"], ["3行目上級"]]
       , [[], [], []]
-      , [["4行目同等級"], ["5行目同等級"], ["6行目同等級"]]
+      , [["4行目上級"], ["5行目上級"], ["6行目上級"]]
       , [[], [], []]
     ];
     for( let i = 0; i <= 1; i++ ){
@@ -270,26 +264,25 @@ function setcubeinfodiv(){
       }
     }
   }
-  let div = document.getElementById("cubeimagediv");
-  div.style.backgroundImage = `url("./images/${data.images[cubename]}")`;
+  let img = document.querySelector("#cubeimagediv .cubeimage");
+  img.style.objectPosition = `50% ${-32 * cubeimagenum}px`;
+  img.style.display = "block";
 }
 
 const trlist = [];
-createTable.type = 1;
-function createTable(list, type=-1){/* type:出力タイプ デフォルトは期待値 */
+function createTable(list){/* type:出力タイプ デフォルトは期待値 */
   createTable.list = list;
-  createTable.switch(type);
+  createTable.switch();
 }
 
-/* 期待値、中央値、確率の表示を設定/切替 */
-createTable.switch = function(type=-1){
+/* 設定に従って確率表の表示 */
+createTable.switch = function(){
+  const type1 = document.getElementById("exporttype1").selectedOptions[0];
+  const type2 = document.getElementById("exporttype2").selectedOptions[0];
   let cubename;
   let linenum;
   if( window.selectedcube ) cubename = window.selectedcube[2];
   if( window.selectedmaxline ) linenum = window.selectedmaxline;
-  
-  if( type < 0 ) type = createTable.type;
-  else           createTable.type = type;
   
   let list = this.list;
   let list2 = {};
@@ -314,52 +307,47 @@ createTable.switch = function(type=-1){
     else if( r.lt(0) ) r = new BigNumber(0);
     
     
-    switch(type){
-      case 0: 
-        list2[v] = [rr.times(10000), r.times(10000)];
-        break;
-      case 1: 
+    switch(type1.value){
+      case "numavg": 
         list2[v] = [new BigNumber(1).div(rr), new BigNumber(1).div(r)];
         break;
-      case 2: /* とりあえずライブラリ追加なしで */
+      case "num50": /* とりあえずライブラリ追加なしで */
         list2[v] = [ e50.div( Math.log( +one.minus(rr) ) ), e50.div( Math.log( one.minus(r) ))];
         break;
-      case 3:
+      case "num95":
         list2[v] = [ e05.div( Math.log( +one.minus(rr) ) ), e05.div( Math.log( one.minus(r) ))];
         break;
-      case 4:
+      case "prob1":
         list2[v] = [rr, r];
         break;
-      case 5:
+      case "prob100":
         list2[v] = [rr.times(100), r.times(100)];
+        break;
+      case "prob10000": 
+        list2[v] = [rr.times(10000), r.times(10000)];
         break;
     }
   }
   list = list2;
   
-  let titlestr = ["確率[1/10000]", "平均値[個]", "50％ライン[個]", "95％ライン[個]", "確率[1/1]", "確率[1/100]"]
-  
-  
   let table = document.createElement("table");
   let tr = table.insertRow(0);
   tr.classList.add("coltitle");
-  tr.innerHTML = `<td>Score</td><td>${titlestr[type]}(==Score)</td><td>${titlestr[type]}(>=Score)</td>`;
-  tr.onclick = tr.ontouch = createTable.switch.bind( createTable, (type+1)%6 );
-  trlist.length = 0;
+  tr.innerHTML = `<td>Score</td><td>${type1.label}(${type2.value}Score)</td>`;
   
+  trlist.length = 0;
   for (let i = 0; i < keys.length; i++) {
     let k = keys[i];
     let row = table.insertRow(i+1);
     trlist.push(row);
     let inner =  `<td>${k}</td>`;
     
-    for(let kk of list[k]){
-      let rateint = Math.trunc(kk);
-      let ratedecimal = kk - rateint; /* 出力結果丸めたいのでBignumberを使わない */
-      rateint = "" + rateint + (ratedecimal > 0 ? "." : "");
-      ratedecimal = ("" + ratedecimal).split(".")[1] || "";
-      inner += `<td><span class="int">${rateint}</span><span class="decimal">${ratedecimal}</span>`;
-    }
+    let kk = (type2.value == "==" ? list[k][0] : list[k][1]);
+    let rateint = Math.trunc(kk);
+    let ratedecimal = kk - rateint; /* 出力結果丸めたいのでBignumberを使わない */
+    rateint = "" + rateint + (ratedecimal > 0 ? "." : "");
+    ratedecimal = ("" + ratedecimal).split(".")[1] || "";
+    inner += `<td><span class="int">${rateint}</span><span class="decimal">${ratedecimal}</span>`;
     row.innerHTML = inner;
   }
   let tdiv = document.getElementById("tablediv");
@@ -368,7 +356,7 @@ createTable.switch = function(type=-1){
   return false;
 };
 
-
+window.scoretemps = [];
 function createcubetable(){
   
   let eqp  = window.selectedequipmenttype;
@@ -382,18 +370,30 @@ function createcubetable(){
   let ownerdiv = document.getElementById("potentialdiv");
   
   let fragment = new DocumentFragment();
-  fragment.appendChild(ownerdiv.children[0].cloneNode(true));
-  fragment.appendChild(ownerdiv.children[1].cloneNode(true));
-  fragment.appendChild(ownerdiv.children[2].cloneNode(true));
-  
   data.exportdata = [rank]; /*確率出力用データ初期化*/
+  
+  // スコアの保存
+  scoretemps = [];
+  {
+    let names = document.getElementsByClassName("potential-name");
+    let vals = document.getElementsByClassName("potential-val");
+    let scores = document.querySelectorAll(".potential-score>input");
+    for(let i = 0; i < names.length; i++){
+      if( scores[i].value > 0 ){
+        scoretemps.push( {name: names[i].innerHTML, val: vals[i].innerHTML, score: scores[i].value} );
+      }
+    }
+  }
   
   createpotentialline(eqp, rank, lv);
   createpotentialline(eqp, rank+1, lv);
   
-  ownerdiv.innerHTML = "";
-  ownerdiv.appendChild(fragment);
+  // 見出し行以外の削除
+  while (ownerdiv.children.length > 3) {
+    ownerdiv.removeChild(ownerdiv.lastChild);
+  }
   
+  ownerdiv.appendChild(fragment);
   onchangedisplayamount(); /* スコア確率表も更新される */
   
   function createpotentialline(eqp, rank, lv){
@@ -441,6 +441,7 @@ function createcubetable(){
       let valdiv = document.createElement("div");
       valdiv.className = `gridbox1 cell ${commons.rankclassnames[rank]}`;
       valdiv.dataset.potentialdepth = trdata[3];
+      valdiv.dataset.potentialrank = rank;
       
       let autodiv = valdiv.cloneNode();
       let namediv = valdiv.cloneNode();
@@ -476,6 +477,15 @@ function createcubetable(){
       autodiv.appendChild(button);
       input.autobutton   = button;
       
+      // スコアの復元
+      for(let temp of scoretemps){
+        if( temp.val == valdiv.innerHTML && temp.name == namediv.innerHTML ){
+          input.value = temp.score;
+          button.classList.add("delete");
+          button.value = "x";
+          break;
+        }
+      }
       fragment.appendChild(autodiv);
       fragment.appendChild(valdiv);
       fragment.appendChild(namediv);
@@ -540,18 +550,24 @@ function onautoinput(){
 function onchangedisplayamount(){
   const cellnum = 5;
   
-  let divs = document.querySelectorAll(`#potentialdiv div[data-potentialdepth]`)
+  let divs = document.querySelectorAll(`#potentialdiv div[data-potentialdepth]`);
   if(divs.length <= 0) return;
   
   let val = +document.getElementById("input-potential-displayamount").value;
   let visiblenum = 0;
+  let potentialrank = 0;
   for(e of divs){
     let d = +e.dataset.potentialdepth;
     e.style.display = (d <= val) ? "" : "none";
     if (d > val) continue;
+    let r = +e.dataset.potentialrank;
+    if( potentialrank != r ){ // 潜在等級が変わったらリセット
+      potentialrank = r;
+      visiblenum = 0;
+    }
     visiblenum++;
     e.classList[ (~~((visiblenum-1) / cellnum)) % 2 == 0 ? "remove" : "add" ]("masked");
-    toggleclass(e, "masked", (~~((visiblenum-1) / cellnum)) % 2 == 1);
+    e.classList.toggle("masked", (~~((visiblenum-1) / cellnum)) % 2 == 1);
   }
   createTable(ondo());
 }
@@ -645,7 +661,7 @@ function ondo(){
     if(inputscore.parentElement.style.display == "none"){
       val = 0;
     }else{
-      toggleclass(inputscore, "error", val < 0);
+      inputscore.classList.toggle("error", val < 0);
       if( val < 0 ) val = 0;
     }
     let n = +!( i+1 < ws[0].length );

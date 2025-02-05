@@ -34,7 +34,7 @@ regularTMS.init = function(){
     };
     
     data.upgradetable = {
-        "uni"     : [ "レア等級下位の確率不明", "N/a", "潜在行数で行選択率指定", "N/a"]
+        "uni"     : [ "レア等級の仕様不明", "N/a", "行数で行選択率指定", "N/a"]
     };
     data.images = {
         "uni"      : "unicube.png"
