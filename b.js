@@ -279,6 +279,10 @@ function createTable(list){/* type:出力タイプ デフォルトは期待値 *
 createTable.switch = function(){
   const type1 = document.getElementById("exporttype1").selectedOptions[0];
   const type2 = document.getElementById("exporttype2").selectedOptions[0];
+  let type3 = document.getElementById("exporttype3");
+  if( type3.validity.badInput ) type3 = 1;
+  else type3 = +type3.value;
+  
   let cubename;
   let linenum;
   if( window.selectedcube ) cubename = window.selectedcube[2];
@@ -333,7 +337,8 @@ createTable.switch = function(){
   let table = document.createElement("table");
   let tr = table.insertRow(0);
   tr.classList.add("coltitle");
-  tr.innerHTML = `<td>Score</td><td>${type1.label}(${type2.value}Score)</td>`;
+  tr.innerHTML = `<td>Score</td><td>${type1.label}(${type2.value})</td>`;
+  if( type3 != 0 && type3 != 1 ) tr.innerHTML += `<td>x${type3}</td>`;
   
   trlist.length = 0;
   for (let i = 0; i < keys.length; i++) {
@@ -343,11 +348,15 @@ createTable.switch = function(){
     let inner =  `<td>${k}</td>`;
     
     let kk = (type2.value == "==" ? list[k][0] : list[k][1]);
-    let rateint = Math.trunc(kk);
-    let ratedecimal = kk - rateint; /* 出力結果丸めたいのでBignumberを使わない */
-    rateint = "" + rateint + (ratedecimal > 0 ? "." : "");
-    ratedecimal = ("" + ratedecimal).split(".")[1] || "";
-    inner += `<td><span class="int">${rateint}</span><span class="decimal">${ratedecimal}</span>`;
+    for( let ii = 0; ii <= 1; ii++ ){
+      if( ii == 1 && (type3 == 0 || type3 == 1) ) break;
+      let kkk = ii == 1 ? kk.times(type3) : kk;
+      let rateint = Math.trunc(kkk);
+      let ratedecimal = kkk - rateint; /* 出力結果丸めたいのでBignumberを使わない */
+      rateint = "" + rateint + (ratedecimal > 0 ? "." : "");
+      ratedecimal = ("" + ratedecimal).split(".")[1] || "";
+      inner += `<td><span class="int">${rateint}</span><span class="decimal">${ratedecimal}</span>`;
+    }
     row.innerHTML = inner;
   }
   let tdiv = document.getElementById("tablediv");
