@@ -356,12 +356,12 @@ input.error {
   position: relative;
   display: flex;
   align-items: center;
-  height: 25px;
+  height: 27px;
 }
 #potentialdiv .potential-score input {
   position: relative;
   z-index: 30000;
-  height: 21px;
+  height: 23px;
   width: 30px;
   padding: 0px 4px;
   margin: 0px;
