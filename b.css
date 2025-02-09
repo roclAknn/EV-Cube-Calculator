@@ -437,7 +437,7 @@ input.error {
 /* つまみ付きゲージ（見た目を共通化するため） */
 #potentialdiv .slider-container {
     position: relative;
-    width: 80px;
+    width: 60px;
     height: 6px;
     margin: 10px 10px;
     background-color: #ddd;
