@@ -310,7 +310,8 @@ input.error {
 #cubeinfodiv .cell {
   border-bottom: solid 1px #bbbbbb;
   text-align: right;
-  align-content: center;
+  display: flex;
+  align-items: center;
   padding: 0px 8px;
   max-height: 70px;
 }
@@ -504,7 +505,8 @@ input.error {
 , #exporttype2div
 , #exporttype3div{
   align-self: center;
-  align-content: center;
+  display: flex;
+  align-items: center;
   cursor: pointer;
   background: #f9f9f9;
   color: #555;
