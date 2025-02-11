@@ -228,11 +228,13 @@ select.input-status::-ms-expand {
 }
 #tablediv td:first-child{
   width: 0px; /* fit-content */
+  max-width: unset;
 }
 #tablediv td {
   overflow: hidden;
   white-space: nowrap;
   border-width: 0px 0px 1px 1px;
+  max-width: 0px; /* テーブル幅からscore列を引いた残りを均等割り */
 }
 #tablediv tr.coltitle {
   background: #f66;
