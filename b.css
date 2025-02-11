@@ -320,6 +320,9 @@ input.error {
 #cubeinfodiv div:nth-of-type(7n-1) {
   border-bottom: none;
 }
+#cubeinfodiv div.none:nth-of-type(7n-1) {
+  font-size: 12px;
+}
 #cubeinfodiv .top
 , #cubeinfodiv .bottom {
   border: none;
