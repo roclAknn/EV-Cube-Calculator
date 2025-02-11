@@ -1187,13 +1187,22 @@ regularKMS.init = function(){
     }
     
     /* 潜在の重複制限 [制限グループ[], 制限数] */
+    
+    
     data.potentialerrorlist = [
       [[oinv], 1]
     , [[opinv], 2]
-    , [[pboss1, pboss2], 2]
-    , [[pign1, pign2], 2]
     , [[pigndam1, pigndam2], 2]
-    , [[pdrop], 2]
+    , [[spwb], 1] /* 公式ではパサーブル系列は1行のみという書き方で、別のパサーブルが重複するか未確認 */
+    , [[spse], 1]
+    , [[spab], 1]
+    , [[spco], 1]
+    , [[sphb], 1]
+    , [[spht], 1]
+    , [[spmd], 1]
+    //, [[pboss1, pboss2], 2] /* JMSで3重複確認済み */
+    //, [[pign1, pign2], 2]
+    //, [[pdrop], 2]
     ];
   
     /* 潜在IDから参照する用 */
