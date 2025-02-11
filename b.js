@@ -350,12 +350,10 @@ createTable.switch = function(){
     let kk = (type2.value == "==" ? list[k][0] : list[k][1]);
     for( let ii = 0; ii <= 1; ii++ ){
       if( ii == 1 && (type3 == 0 || type3 == 1) ) break;
-      let kkk = ii == 1 ? kk.times(type3) : kk;
-      let rateint = Math.trunc(kkk);
-      let ratedecimal = kkk - rateint; /* 出力結果丸めたいのでBignumberを使わない */
-      rateint = "" + rateint + (ratedecimal > 0 ? "." : "");
-      ratedecimal = ("" + ratedecimal).split(".")[1] || "";
-      inner += `<td><span class="int">${rateint}</span><span class="decimal">${ratedecimal}</span>`;
+      let kkk = (ii == 1) ? kk.times(type3) : kk;
+      let [rateint, ratedecimal] = kkk.toFixed().split(".");
+      if( ratedecimal > 0 ) rateint = "" + rateint + ".";
+      inner += `<td><span class="int">${rateint}</span><span class="decimal">${ratedecimal||""}</span>`;
     }
     row.innerHTML = inner;
   }
