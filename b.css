@@ -309,7 +309,7 @@ input.error {
 }
 #cubeinfodiv .cell {
   border-bottom: solid 1px #bbbbbb;
-  text-align: right;
+  justify-content: end;
   display: flex;
   align-items: center;
   padding: 0px 8px;
