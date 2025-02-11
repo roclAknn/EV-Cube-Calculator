@@ -269,7 +269,6 @@ function setcubeinfodiv(){
   img.style.display = "block";
 }
 
-const trlist = [];
 function createTable(list){/* type:出力タイプ デフォルトは期待値 */
   createTable.list = list;
   createTable.switch();
@@ -334,28 +333,30 @@ createTable.switch = function(){
   }
   list = list2;
   
-  let table = document.createElement("table");
-  let tr = table.insertRow(0);
-  tr.classList.add("coltitle");
-  tr.innerHTML = `<td>Score</td><td>${type1.label}(${type2.value})</td>`;
-  if( type3 != 0 && type3 != 1 ) tr.innerHTML += `<td>x${type3}</td>`;
+  let showbool = ( type3 != 0 && type3 != 1 );
+  let table = document.createElement("div");
+  table.classList.add("table");
+  if( showbool ) table.classList.add("showsecondary");
   
-  trlist.length = 0;
+  let tagstart = `<div class="coltitle">`;
+  let inner = `${tagstart}<span>Score</span></div>${tagstart}<span>${type1.label}(${type2.value})</span></div>`;
+  if( showbool ) inner += `${tagstart}<span>x${type3}</span></div>`;
+  
+  table.insertAdjacentHTML("beforeend", inner);
+  
   for (let i = 0; i < keys.length; i++) {
     let k = keys[i];
-    let row = table.insertRow(i+1);
-    trlist.push(row);
-    let inner =  `<td>${k}</td>`;
+    let inner =  `<div><span>${k}</span></div>`;
     
     let kk = (type2.value == "==" ? list[k][0] : list[k][1]);
     for( let ii = 0; ii <= 1; ii++ ){
-      if( ii == 1 && (type3 == 0 || type3 == 1) ) break;
+      if( ii == 1 && !showbool ) break;
       let kkk = (ii == 1) ? kk.times(type3) : kk;
       let [rateint, ratedecimal] = kkk.toFixed().split(".");
       if( ratedecimal > 0 ) rateint = "" + rateint + ".";
-      inner += `<td><span class="int">${rateint}</span><span class="decimal">${ratedecimal||""}</span>`;
+      inner += `<div><span><span class="int">${rateint}</span><span class="decimal">${ratedecimal||""}</span></span></div>`;
     }
-    row.innerHTML = inner;
+    table.insertAdjacentHTML("beforeend", inner);
   }
   let tdiv = document.getElementById("tablediv");
   tdiv.innerHTML = "";
