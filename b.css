@@ -316,12 +316,10 @@ input.error {
   padding: 0px 8px;
   max-height: 70px;
   overflow: hidden;
+  font-size: 12px;
 }
 #cubeinfodiv div:nth-of-type(7n-1) {
   border-bottom: none;
-}
-#cubeinfodiv div.none:nth-of-type(7n-1) {
-  font-size: 12px;
 }
 #cubeinfodiv .top
 , #cubeinfodiv .bottom {
