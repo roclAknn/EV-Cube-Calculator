@@ -1,6 +1,5 @@
 
 
-
 const cubetypes = [
   ["KMS/レッドキューブ",   regularKMS, "red", 0]
 , ["KMS/ブラックキューブ", regularKMS, "black", 1]
@@ -30,6 +29,9 @@ window.selectedequipmentlevel = -1;
 window.selectedrank = -1;
 window.selectedmaxline = -1;
 window.checkedapplyerrlist = true;
+
+window.calcRoundDegit = 30; // 計算中の丸め位置(-1：javascript仕様)
+window.exportRoundDegit = 15; // 出力結果の丸め位置(-1：javascript仕様)
 
 /*===== ページロード後初期化処理 ===============================================*/
 function initialize(){
@@ -305,10 +307,12 @@ createTable.switch = function(){
       rr = rr.times(3-linenum+1).div(3);
     }
     
+    if(calcRoundDegit >= 0){
+      rr = rr.decimalPlaces(calcRoundDegit); // 恣意的丸め(累積計算精度)
+    }
     r = r.plus(rr);
     if     ( r.gt(1) ) r = new BigNumber(1);
     else if( r.lt(0) ) r = new BigNumber(0);
-    
     
     switch(type1.value){
       case "numavg": 
@@ -330,9 +334,13 @@ createTable.switch = function(){
         list2[v] = [rr.times(10000), r.times(10000)];
         break;
     }
+    
+    // 恣意的丸め(出力精度)
+    if (exportRoundDegit >= 0){
+      list2[v] = list2[v].map(e => e.decimalPlaces(exportRoundDegit));
+    }
   }
   list = list2;
-  
   let showbool = ( type3 != 0 && type3 != 1 );
   let table = document.createElement("div");
   table.classList.add("table");
