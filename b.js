@@ -31,7 +31,7 @@ window.selectedmaxline = -1;
 window.checkedapplyerrlist = true;
 
 window.calcRoundDegit = 30; // 計算中の丸め位置(-1：javascript仕様)
-window.exportRoundDegit = 15; // 出力結果の丸め位置(-1：javascript仕様)
+window.exportRoundDegit = 12; // 出力結果の丸め位置(-1：javascript仕様)
 
 /*===== ページロード後初期化処理 ===============================================*/
 function initialize(){
