@@ -303,6 +303,7 @@ createTable.switch = function(){
     else if( rr.lt(0) ) rr = new BigNumber(0);
     
     /* ユニキューブは潜在行数を行選択確率として使う */
+    /* 0スコアが行数に一致してしまう(本来は1になるべき)けど行数の設定間違いに気づきやすいので修正しない */
     if(cubename == "uni"){
       rr = rr.times(3-linenum+1).div(3);
     }
