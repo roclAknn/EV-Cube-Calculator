@@ -30,8 +30,9 @@ window.selectedrank = -1;
 window.selectedmaxline = -1;
 window.checkedapplyerrlist = true;
 
-window.calcRoundDegit = 30; // 計算中の丸め位置(-1：javascript仕様)
-window.exportRoundDegit = 12; // 出力結果の丸め位置(-1：javascript仕様)
+BigNumber.config({ DECIMAL_PLACES: 25 }); // BigNumber.jsの計算精度
+window.calcRoundDegit = 30; // 出力累積計算の丸め位置(-1：javascript/BigNumber仕様)
+window.exportRoundDegit = 12; // 出力結果の丸め位置(-1：javascript/BigNumber仕様)
 
 /*===== ページロード後初期化処理 ===============================================*/
 function initialize(){
