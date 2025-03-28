@@ -336,11 +336,6 @@ createTable.switch = function(){
         list2[v] = [rr.times(10000), r.times(10000)];
         break;
     }
-    
-    // 恣意的丸め(出力精度)
-    if (exportRoundDegit >= 0){
-      list2[v] = list2[v].map(e => e.decimalPlaces(exportRoundDegit));
-    }
   }
   list = list2;
   let showbool = ( type3 != 0 && type3 != 1 );
@@ -362,6 +357,12 @@ createTable.switch = function(){
     for( let ii = 0; ii <= 1; ii++ ){
       if( ii == 1 && !showbool ) break;
       let kkk = (ii == 1) ? kk.times(type3) : kk;
+      
+      // 恣意的丸め(出力精度)
+      if (exportRoundDegit >= 0){
+        kkk = kkk.decimalPlaces(exportRoundDegit);
+      }
+      
       let [rateint, ratedecimal] = kkk.toFixed().split(".");
       if( ratedecimal > 0 ) rateint = "" + rateint + ".";
       inner += `<div><span><span class="int">${rateint}</span><span class="decimal">${ratedecimal||""}</span></span></div>`;
