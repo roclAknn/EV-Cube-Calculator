@@ -90,10 +90,10 @@ function initcubedatas(){
   commons.potentialnum = potentialnum;
   
   
-  
+  // キューブデータの初期化
   regularKMS.init();
   additionalKMS.init();
-  regularTMS.init();
+  regularTMS.init(); //regularKMSに依存
 }
 
 commons.createpotentialinfolist = function(data){
