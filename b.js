@@ -295,30 +295,37 @@ createTable.switch = function(){
   
   let keys = Object.keys(list).sort((a,b)=>{/* スコア降順ソート */ return (+a < +b) - (+a > +b)});
   let r = new BigNumber(0);
+  let zero = new BigNumber(0);
   let one = new BigNumber(1);
   let e50 = new BigNumber( Math.LN2 ).times(-1);
   let e05 = new BigNumber( Math.LN2 ).plus( Math.LN10 ).times( -1 );
   for(let v of keys){
     let rr = list[v];
-    if     ( rr.gt(1) ) rr = new BigNumber(1);
-    else if( rr.lt(0) ) rr = new BigNumber(0);
+    if     ( rr.gt(1) ) rr = one;
+    else if( rr.lt(0) ) rr = zero;
+    
+    /* v==0で帳尻を合わせるフラグ */
+    let isAdjust = (v == 0);
     
     /* ユニキューブは潜在行数を行選択確率として使う */
     /* 0スコアも潜在行数を含めた出力にする（平均値1ではなく3）行数の設定をここで確認できるようにするため */
     if(cubename == "uni"){
-      rr = rr.times(3-linenum+1).div(3);
+      let targetlinenum = 3-(linenum-1); // 1~3
+      rr = rr.times(targetlinenum).div(3);
+      if (targetlinenum < 3) isAdjust = false; // 3行狙いのみ修正
     }
     
     if(calcRoundDegit >= 0){
       rr = rr.decimalPlaces(calcRoundDegit); // 恣意的丸め(累積計算精度)
     }
     r = r.plus(rr);
-    if     ( r.gt(1) ) r = new BigNumber(1);
-    else if( r.lt(0) ) r = new BigNumber(0);
+    if     ( isAdjust ) r = one;
+    else if( r.gt(1) ) r = one;
+    else if( r.lt(0) ) r = zero;
     
     switch(type1.value){
       case "numavg": 
-        list2[v] = [new BigNumber(1).div(rr), new BigNumber(1).div(r)];
+        list2[v] = [one.div(rr), one.div(r)];
         break;
       case "num50": /* とりあえずライブラリ追加なしで */
         list2[v] = [ e50.div( Math.log( +one.minus(rr) ) ), e50.div( Math.log( one.minus(r) ))];
