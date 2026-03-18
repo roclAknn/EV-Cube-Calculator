@@ -345,6 +345,8 @@ regularTMS.init = function(){
         data.potentialerrorlist2[pid] = i;
       });
     });
+    
+    convertcubedataForNew(data);
   }
 };
 

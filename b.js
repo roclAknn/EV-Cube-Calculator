@@ -282,8 +282,10 @@ createTable.switch = function(){
   const type1 = document.getElementById("exporttype1").selectedOptions[0];
   const type2 = document.getElementById("exporttype2").selectedOptions[0];
   let type3 = document.getElementById("exporttype3");
-  if( type3.validity.badInput ) type3 = 1;
-  else type3 = +type3.value;
+  type3 = inputCalc(type3.value);
+  if (type3 <= 0) type3 = 1;
+  // if( type3.validity.badInput ) type3 = 1;
+  // else type3 = +type3.value;
   
   let cubename;
   let linenum;
@@ -297,7 +299,7 @@ createTable.switch = function(){
   let r = new BigNumber(0);
   let zero = new BigNumber(0);
   let one = new BigNumber(1);
-  let e50 = new BigNumber( Math.LN2 ).times(-1);
+  let e50 = new BigNumber( Math.LN2 ).times( -1 );
   let e05 = new BigNumber( Math.LN2 ).plus( Math.LN10 ).times( -1 );
   for(let v of keys){
     let rr = list[v];
@@ -396,7 +398,7 @@ function createcubetable(){
   let ownerdiv = document.getElementById("potentialdiv");
   
   let fragment = new DocumentFragment();
-  data.exportdata = [rank]; /*確率出力用データ初期化*/
+  data.exportdata = {rank, weights:[]}; /*確率出力用データ初期化*/
   
   // スコアの保存
   scoretemps = [];
@@ -427,46 +429,22 @@ function createcubetable(){
     let sumweight = 0;
     let weights = [0];
     data.equipmentpotential[cubename][eqp][rank].forEach((pdata)=>{
-      let pnum = pdata[0];
+      let {name, id, weight, depth} = pdata;
+      let val = pdata.getValue(lv);
       
-      let pname     = data.potentialinfolist[pnum][0];
-      let pinfolist = data.potentialinfolist[pnum][1];
-      let pdepth = pinfolist[0];
-      let pinfo  = pinfolist[1 + rank];
+      sumweight += weight;
+      weights.push({id, weight});
       
-      if(pinfo.length <= 0){
-        console.error("潜在情報の指定等級の情報が空");
-        console.log([pnum, pname, pinfo]);
-      }
-      
-      let pval = null;
-      for(let i = pinfo.length - 1; 0 <= i; i--){
-        if(lv < pinfo[i][0]) continue;
-        pval = pinfo[i];
-        break;
-      }
-      if(!pval) return;
-      
-      //let rateweight = pweights[pnum][rank];
-      let rateweight = pdata[1];
-      if( !rateweight || isNaN(rateweight) ){
-        console.error("重みづけが不正");
-        //console.log([pnum, pname, rateweight, pweights]);
-        console.log([pnum, pname, rateweight, pdata[1]]);
-      }
-      sumweight += rateweight;
-      weights.push([rateweight, pnum]);
-      
-      trdatas.push([pname, pval, rateweight, pdepth, pnum]);
+      trdatas.push({name, val, weight, depth, id});
     });
-    
     weights[0] = sumweight;
-    data.exportdata.push(weights);
+    data.exportdata.weights.push(weights);
     
     for(let trdata of trdatas){
+      let {name, val, weight, depth, id} = trdata;
       let valdiv = document.createElement("div");
       valdiv.className = `gridbox1 cell ${commons.rankclassnames[rank]}`;
-      valdiv.dataset.potentialdepth = trdata[3];
+      valdiv.dataset.potentialdepth = depth;
       valdiv.dataset.potentialrank = rank;
       
       let autodiv = valdiv.cloneNode();
@@ -479,16 +457,15 @@ function createcubetable(){
       scorediv.classList.add("potential-score");
       ratediv.classList.add("potential-rate");
       
-      valdiv.innerHTML = trdata[1][1] || "";
-      namediv.innerHTML = trdata[0];
-      //ratediv.innerHTML = "" + (Math.round(trdata[2] * 100*10**4 / sumweight) / 10**4) + " %";
-      ratediv.innerHTML = "" + (trdata[2] * 100 / sumweight).toFixed(4) + " %";
-      
+      valdiv.innerHTML = val || "";
+      namediv.innerHTML = name;
+      ratediv.innerHTML = "" + (weight * 100 / sumweight).toFixed(4) + " %";
       
       let input = document.createElement("input");
-      input.autoinput = trdata[1][1] || 1;
-      input.type      = "number";
-      input.className = `input-status no-spin input-score input-score-${trdata[4]}`;
+      input.autoinput = val || 1;
+      input.type      = "text";
+      input.inputMode="decimal";
+      input.className = `input-status no-spin input-score input-score-${id}`;
       input.oninput   = oninputscore;
       scorediv.appendChild(input);
       
@@ -546,10 +523,12 @@ function oninputscore(){
 }
 
 function onautoinput(){
-  
   let score = this.score;
-  //遅延処理の場合に対応できないのでerrorクラスで判定しない
-  let sc = score.validity.badInput ? -1 : +score.value;
+  
+  let val = score.value.trim();
+  if ( /^[+\-*/]/.test(val) ) val = score.autoinput + val;
+  let sc = inputCalc(val);
+  // let sc = score.validity.badInput ? -1 : +score.value;
   
   if( this.classList.contains("delete") ){
     //入力済みの場合は削除ボタン
@@ -570,7 +549,6 @@ function onautoinput(){
     score.value = score.autoinput;
     score.oninput();
   }
-  
 }
 
 function onchangedisplayamount(){
@@ -659,15 +637,57 @@ function closeDropdowns(event) {
 
 
 /*========= 計算処理 ================================================*/
+class scoredata{
+  vals = [0, 0];
+  constructor({input, eid, rankidx, val}){
+    this.input = input;
+    this.eid = eid;
+    this.add(rankidx, val);
+  }
+  add(rankidx, val){
+    this.vals[rankidx] += val;
+  }
+  div(rankidx, val){
+    this.vals[rankidx] = new BigNumber( this.vals[rankidx] ).div(val);
+  }
+}
+
+class errdata{
+  probs = [new BigNumber(0), new BigNumber(0)]; // [上級, 下級]
+  counts = []; // eidごとの現在付与行数
+  capped = []; // eidごとの制限到達チェック(キャッシュ)
+  constructor(edata){
+    if (!edata) return;
+    this.probs = [...edata.probs];
+    this.counts = [...edata.counts];
+    this.capped = [...edata.capped];
+  }
+}
+
+/* スコア入力に式を許可する */
+function inputCalc(expr) {
+  if (expr.trim() == "") return 0;
+  try{
+    // 許可する文字を制限する
+    if (!/^[0-9+\-*/.\s]+$/.test(expr)) {
+      throw new Error("invalid characters");
+    }
+    
+    return Function(`"use strict"; return (${expr})`)();
+  }catch(ex){
+    return -1;
+  }
+}
+
 function ondo(){
   
   let data     = window.selectedcube[1];
   let cubename = window.selectedcube[2];
   let maxline  = window.selectedmaxline;
   let applyerrlist = window.checkedapplyerrlist;
-  let rank = data.exportdata[0];
+  let rank = data.exportdata.rank;
+  let weights = data.exportdata.weights; // [上級, 下級]
   let cuberankrate = data.ratetable[cubename][rank];
-  let ws = [data.exportdata[1], data.exportdata[2]];
   
   let fixlinenum = data.fixlinenum[cubename];
   if(fixlinenum > 0) maxline = fixlinenum;
@@ -682,54 +702,57 @@ function ondo(){
   
   for(let i = 0; i < inputscores.length; i++){
     let inputscore = inputscores[i];
+    let val = inputscore.value.trim();
+    if ( /^[+\-*/]/.test(val) ) val = inputscore.autoinput + val;
+    val = inputCalc(val);
+    /*
     let val = inputscore.value;
     val = inputscore.validity.badInput ? -1 : +val;
+    */
     if(inputscore.parentElement.style.display == "none"){
       val = 0;
     }else{
       inputscore.classList.toggle("error", val < 0);
       if( val < 0 ) val = 0;
     }
-    let n = +!( i+1 < ws[0].length );
-    let wdata = ws[n][ i+1 - ( n ? (ws[0].length-1) : 0 ) ];
     
-    /**
-    * 最適化のためスコアと重複制限グループが同じなら抽選率の比重をまとめる
-    * scores[i] = [スコア　[上位比重　下位比重]　重複エラーグループ]
-    */
-    let w = wdata[0];
-    let pid = wdata[1];
+    let n = ( i < weights[0].length - 1 ) ? 0 : 1;
+    let ws = weights[n];
+    let wdata = ws[ i+1 - ( n ? (weights[0].length - 1) : 0 ) ];
+    
+    /* 最適化のためスコアと重複制限グループが同じなら抽選率の比重をまとめる */
+    let w   = wdata.weight;
+    let pid = wdata.id;
     let eid = errlist2[pid];
     if( !applyerrlist || eid == undefined ) eid = -1;
     let bool = true;
-    for(let sc of scores){
-      if(sc[0] == val && sc[2] == eid){
-        sc[1][n] += w;
+    
+    for (let sc of scores){
+      /* スコアとエラーグループが一致するデータがあれば加算する */
+      if (sc.input == val && sc.eid == eid){
+        sc.add(n, w);
         bool = false;
         break;
       }
     }
+    /* 新規スコアなら追加 */
     if( bool ){
       if( maxscore < val ) maxscore = val;
-      scores.push([val, (n ? [0, w] : [w, 0]), eid]);
+      scores.push(new scoredata({input: val, eid, rankidx: n, val: w}));
     }
   }
   
   for(let sc of scores){
-    sc[1][0] = new BigNumber(sc[1][0]).div(ws[0][0]);
-    sc[1][1] = new BigNumber(sc[1][1]).div(ws[1][0]);
+    sc.div(0, weights[0][0]);
+    sc.div(1, weights[1][0]);
   }
   
   
-  /**
-  * 重複エラー処理について
-  * KMS公式より：１行目から設定していき、潜在重複エラーならその行の等級抽選からやり直す？
-  */
   let vs = [], rs = [];
   let result = {};
   
   if( 0 < maxscore ){
-    calc( 0, maxline, [[new BigNumber(0), new BigNumber(0)], [], []] );
+    calc( 0, maxline, new errdata() );
   }else{
     result["0"] = new BigNumber(1);
   }
@@ -738,48 +761,51 @@ function ondo(){
   
   
   /* line=line～maxline-1の再帰処理 */
-  function calc(line=0, maxline=3, erw ){
-    let err = new BigNumber(0);
-    /*
-    * line-1行までに制限潜在があれば制限処理
-    * erw[2]にtrueを含むかの判定。truefalseを切り替えないのでlengthの確認で十分
+  function calc(line=0, maxline=3, edata ){
+    
+    /**
+    * 重複エラー処理について
+    * KMS公式より：１行目から設定していき、潜在重複エラーならその行の等級抽選からやり直す？
     */
-    if( erw[2].length ){
+    
+    // line-1行までに制限潜在があれば制限処理
+    let eprobs = edata.probs;
+    let errprob = new BigNumber(0);
+    if( edata.capped.length ){
       /* line行で重複制限を引く(=この行を引き直す)確率 */
-      err = erw[0][0].times( cuberankrate[line][0] ).plus( err );
-      err = erw[0][1].times( cuberankrate[line][1] ).plus( err );
+      errprob = eprobs[0].times( cuberankrate[line][0] ).plus( errprob );
+      errprob = eprobs[1].times( cuberankrate[line][1] ).plus( errprob );
     }
     
     for(let sc of scores){
       let r, v;
       
-      let eid = sc[2];
-      if( erw[2][ eid ] ) continue; /* 重複制限チェック */
+      let eid = sc.eid;
+      if( edata.capped[ eid ] ) continue; /* 重複制限チェック */
       
-      r =         sc[1][0].times( cuberankrate[line][0] );
-      r = r.plus( sc[1][1].times( cuberankrate[line][1] ) );
+      r =         sc.vals[0].times( cuberankrate[line][0] );
+      r = r.plus( sc.vals[1].times( cuberankrate[line][1] ) );
       if( +r <= 0 ) continue;
       
-      vs[line] = new BigNumber( sc[0] );
-      rs[line] = r.div( new BigNumber(1).minus(err) );
+      vs[line] = new BigNumber( sc.input );
+      rs[line] = r.div( new BigNumber(1).minus(errprob) );
       
       if( line+1 < maxline ){
-        let erw2 = erw;
-        let eid = sc[2];
+        let edata2 = edata;
         if( eid < 0 ){
         }else{
-          erw2 = [erw[0].concat(), erw[1].concat(), erw[2].concat()];
-          erw2[1][eid] = 1 + ( erw2[1][eid] || 0 );
-          if( errlist1[eid][1] <= erw2[1][eid] ){
-            erw2[2][eid] = true;
+          edata2 = new errdata(edata); // コピーを作成
+          edata2.counts[eid] = 1 + ( edata2.counts[eid] || 0 );
+          if( errlist1[eid][1] <= edata2.counts[eid] ){
+            edata2.capped[eid] = true;
             for(let esc of scores){
-              if( esc[2] != eid ) continue;
-              erw2[0][0] = erw2[0][0].plus(esc[1][0]);
-              erw2[0][1] = erw2[0][1].plus(esc[1][1]);
+              if( esc.eid != eid ) continue;
+              edata2.probs[0] = edata2.probs[0].plus(esc.vals[0]);
+              edata2.probs[1] = edata2.probs[1].plus(esc.vals[1]);
             }
           }
         }
-        calc(line+1, maxline, erw2);
+        calc(line+1, maxline, edata2);
         continue;
       }
       

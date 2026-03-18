@@ -243,7 +243,6 @@ additionalKMS.init = function(){
     
   })();
   
-  convertcubedata(data);
 
 
   /*========================= 潜在能力の設定 =================================================*/
@@ -963,6 +962,8 @@ additionalKMS.init = function(){
         data.potentialerrorlist2[pid] = i;
       });
     });
+    
+    convertcubedataForOld(data);
   }
 
 

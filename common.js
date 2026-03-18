@@ -229,18 +229,62 @@ commons.createpotentialinfolist = function(data){
   return list;
 }
 
-/*重み付け共通で作成したキューブデータベースへの対応*/
+/* 潜在能力クラス(id, weight) */
+class potential{
+  constructor({id, weight, data, rank}){
+    Object.assign(this, arguments[0]);
+    this.get = () => {return this.data.potentialinfolist[id][0]};
+  }
+  get name(){return this.data.potentialinfolist[this.id][0];}
+  get info(){return this.data.potentialinfolist[this.id][1];}
+  get depth(){return this.info[0];}
+  getValue(lv){
+    const info = this.info[1 + this.rank];
+    
+    if (info.length <= 0)
+      console.error("潜在情報の指定等級の情報が空", this.id, this.name, this.info, this.rank, lv);
+    
+    for(let i = info.length - 1; 0 <= i; i--){
+      if(lv < info[i][0]) continue;
+      return info[i][1]; break;
+    }
+  }
+}
+
+/* 潜在データをクラス化 */
 /* pnum -> [pnum, pweight] */
-function convertcubedata(data){
+function convertcubedataForOld(data){
   for(let cubename in data.equipmentpotential){
     let pweights = data.weights[cubename];
-    for(let eqp in data.equipmentpotential[cubename]){
-      for(let rank in data.equipmentpotential[cubename][eqp]){
-        let list = data.equipmentpotential[cubename][eqp][rank];
+    for(let byEqp of data.equipmentpotential[cubename]){
+      for(let rank = 0; rank < byEqp.length; rank++ ){
+        let list = byEqp[rank];
         for(let i = 0; i < list.length; i++){
-          let pnum = list[i];
-          if(typeof pnum != "number") break;
-          list[i] = [pnum, pweights[pnum][rank]];
+          let id = list[i];
+          if (typeof id != "number") break;
+          let weight = pweights[id][rank];
+          if (!weight || isNaN(weight))
+            console.error("重み付けが不正", id, weight, rank);
+          list[i] = new potential({
+            id,  weight, data, rank
+          });
+        }
+  } } }
+}
+function convertcubedataForNew(data){
+  for(let cubename in data.equipmentpotential){
+    for(let byEqp of data.equipmentpotential[cubename]){
+      for(let rank = 0; rank < byEqp.length; rank++ ){
+        let list = byEqp[rank];
+        for(let i = 0; i < list.length; i++){
+          let id = list[i][0];
+          if(typeof id != "number") break;
+          let weight = list[i][1];
+          if (!weight || isNaN(weight))
+            console.error("重み付けが不正", id, weight, rank);
+          list[i] = new potential({
+            id,  weight, data, rank
+          });
         }
   } } }
 }
