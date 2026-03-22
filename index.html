@@ -9,6 +9,7 @@
     <link rel="stylesheet" href="b.css">
     <link rel="icon" href="images/favicon.ico" type="image/x-icon">
     <script src='https://cdn.jsdelivr.net/npm/bignumber.js@9.1.2/bignumber.min.js'></script>
+    <script src='https://cdn.jsdelivr.net/npm/decimal.js@10.6.0/decimal.min.js'></script>
     <script src="regularKMS.js"></script>
     <script src="additionalKMS.js"></script>
     <script src="regularTMS.js"></script>
@@ -111,13 +112,17 @@
           <div id="condition-eqp">
             <img class="eqpimage" src="./images/equipments.png">
           </div>
-          <div id="condition-level"></div>
-          <div id="condition-rank" style="text-align: left; padding-left: 6px;"></div>
-          <div id="exporttype1div" style="align-content: center;"></div>
+          <div id="condition-expantion-container">
+            <div id="condition-level"></div>
+            <div id="condition-rank"></div>
+          </div>
+          
+          <input id="exporttype1input" class="no-spin" oninput="createTable.switch();"value="1" type="text" inputmode="decimal" disabled>
+          <div id="exporttype1div"></div>
           <select id="exporttype1" hidden></select>
-          <div id="exporttype2div" style="align-content: center;"></div>
+          <div id="exporttype2div"></div>
           <select id="exporttype2" hidden></select>
-          <div id="exporttype3div" style="align-content: center;">
+          <div id="exporttype3div">
             <input id="exporttype3" class="no-spin" oninput="createTable.switch();" value="1" type="text" inputmode="decimal">
           </div>
         </div>
@@ -125,9 +130,10 @@
       <script>
         {
           /* exporttype1,2の処理 */
+          const exporttype1input = document.getElementById("exporttype1input");
           const exporttype1div = document.getElementById("exporttype1div");
           const exporttype1 = document.getElementById("exporttype1");
-          const exporttype1names  = ["平均消費数[個]", "50%ライン[個]", "95%ライン[個]", "確率[x1]", "確率[x100]", "確率[x10000]"];
+          const exporttype1names  = ["平均消費数[個]", "50%ライン[個]", "95%ライン[個]", "個で出る確率[x1]", "個で出る確率[x100]", "個で出る確率[x10000]"];
           const exporttype1values = ["numavg", "num50", "num95", "prob1", "prob100", "prob10000"];
           const exporttype2div = document.getElementById("exporttype2div");
           const exporttype2 = document.getElementById("exporttype2");
@@ -156,8 +162,9 @@
           idx = exporttype2.selectedIndex;
           exporttype2div.innerHTML = exporttype2.selectedOptions[0].label;
           exporttype1div.onclick = function(){
-            exporttype1.selectedIndex = (exporttype1.selectedIndex + 1) % exporttype1.length;
+            let idx = exporttype1.selectedIndex = (exporttype1.selectedIndex + 1) % exporttype1.length;
             exporttype1div.innerHTML = exporttype1.selectedOptions[0].label;
+            exporttype1input.disabled = !/^prob/.test( exporttype1values[idx] );
             // テーブル切り替え処理
             createTable.switch();
           }

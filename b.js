@@ -30,9 +30,13 @@ window.selectedrank = -1;
 window.selectedmaxline = -1;
 window.checkedapplyerrlist = true;
 
-BigNumber.config({ DECIMAL_PLACES: 25 }); // BigNumber.jsの計算精度
-window.calcRoundDegit = 30; // 出力累積計算の丸め位置(-1：javascript/BigNumber仕様)
-window.exportRoundDegit = 12; // 出力結果の丸め位置(-1：javascript/BigNumber仕様)
+/* BigNumberの設定　小数桁数精度 */
+BigNumber.config({ DECIMAL_PLACES: 25 }); // 計算精度
+window.calcRoundDegit = 25; // 出力累積計算の丸め位置
+window.exportRoundDegit = 12; // 出力結果の丸め位置
+
+/* Decimal.jsの設定　有効桁数精度 */
+Decimal.set({ precision: 40 }); // 計算制度
 
 /*===== ページロード後初期化処理 ===============================================*/
 function initialize(){
@@ -279,10 +283,14 @@ function createTable(list){/* type:出力タイプ デフォルトは期待値 *
 
 /* 設定に従って確率表の表示 */
 createTable.switch = function(){
-  const type1 = document.getElementById("exporttype1").selectedOptions[0];
-  const type2 = document.getElementById("exporttype2").selectedOptions[0];
-  let type3 = document.getElementById("exporttype3");
-  type3 = inputCalc(type3.value);
+  const type1sel = document.getElementById("exporttype1").selectedOptions[0];
+  const type1 = type1sel.value;
+  const type2 = document.getElementById("exporttype2").selectedOptions[0].value;
+  let cubenum = document.getElementById("exporttype1input").value;
+  cubenum = inputCalc(cubenum);
+  if (cubenum < 1) cubenum = 1;
+  let type3 = document.getElementById("exporttype3").value;
+  type3 = inputCalc(type3);
   if (type3 <= 0) type3 = 1;
   // if( type3.validity.badInput ) type3 = 1;
   // else type3 = +type3.value;
@@ -299,8 +307,13 @@ createTable.switch = function(){
   let r = new BigNumber(0);
   let zero = new BigNumber(0);
   let one = new BigNumber(1);
-  let e50 = new BigNumber( Math.LN2 ).times( -1 );
-  let e05 = new BigNumber( Math.LN2 ).plus( Math.LN10 ).times( -1 );
+  let e50 = new Decimal(2).ln().times(-1);
+  let e05 = new Decimal(20).ln().times(-1);
+  let deci1 = new Decimal(1);
+  let deci0 = new Decimal(0);
+  
+  let type1primary = type1.match(/^num|^prob/)?.at(0);
+  let type1secondary = type1primary ? type1.match(new RegExp(type1primary + "(.+)")).at(1) : null;
   for(let v of keys){
     let rr = list[v];
     if     ( rr.gt(1) ) rr = one;
@@ -325,25 +338,30 @@ createTable.switch = function(){
     else if( r.gt(1) ) r = one;
     else if( r.lt(0) ) r = zero;
     
-    switch(type1.value){
-      case "numavg": 
+    
+    if (type1primary == "num"){
+      if (type1secondary == "avg"){
         list2[v] = [one.div(rr), one.div(r)];
-        break;
-      case "num50": /* とりあえずライブラリ追加なしで */
-        list2[v] = [ e50.div( Math.log( +one.minus(rr) ) ), e50.div( Math.log( one.minus(r) ))];
-        break;
-      case "num95":
-        list2[v] = [ e05.div( Math.log( +one.minus(rr) ) ), e05.div( Math.log( one.minus(r) ))];
-        break;
-      case "prob1":
-        list2[v] = [rr, r];
-        break;
-      case "prob100":
-        list2[v] = [rr.times(100), r.times(100)];
-        break;
-      case "prob10000": 
-        list2[v] = [rr.times(10000), r.times(10000)];
-        break;
+      } else {
+        let _rr = deci1.div( deci1.minus(rr.toString() ).ln() )
+        ,    _r = deci1.div( deci1.minus( r.toString() ).ln() );
+        switch(type1secondary){
+        case "50":
+          _rr = e50.times(_rr); _r = e50.times( _r);
+          break;
+        case "95":
+          _rr = e05.times(_rr); _r = e05.times( _r);
+          break;
+        }
+        list2[v] = [BigNumber(_rr.toString()), BigNumber(_r.toString())]; //現状BigNumberで統一しておく
+      }
+    } else if(type1primary == "prob"){
+      let times = +type1secondary;
+      const calcLeastOnce = (prob, num) => Decimal(1).minus( Decimal(1).minus(prob).pow(num) );
+      // decimal.jsで計算するので文字列型で渡す
+      let _rr = calcLeastOnce(rr.toString(), cubenum).times(times)
+      ,    _r = calcLeastOnce( r.toString(), cubenum).times(times);
+      list2[v] = [BigNumber(_rr.toString()), BigNumber(_r.toString())]; //現状BigNumberで統一しておく
     }
   }
   list = list2;
@@ -353,7 +371,11 @@ createTable.switch = function(){
   if( showbool ) table.classList.add("showsecondary");
   
   let tagstart = `<div class="coltitle">`;
-  let inner = `${tagstart}<span>Score</span></div>${tagstart}<span>${type1.label}(${type2.value})</span></div>`;
+  let problabel = `${type1sel.label}(${type2})`;
+  if ( type1primary == "prob" ){
+    problabel = Math.round(cubenum * 100)/100 + problabel;
+  }
+  let inner = `${tagstart}<span>Score</span></div>${tagstart}<span>${problabel}</span></div>`;
   if( showbool ) inner += `${tagstart}<span>x${type3}</span></div>`;
   
   table.insertAdjacentHTML("beforeend", inner);
@@ -362,7 +384,7 @@ createTable.switch = function(){
     let k = keys[i];
     let inner =  `<div><span>${k}</span></div>`;
     
-    let kk = (type2.value == "==" ? list[k][0] : list[k][1]);
+    let kk = (type2 == "==" ? list[k][0] : list[k][1]);
     for( let ii = 0; ii <= 1; ii++ ){
       if( ii == 1 && !showbool ) break;
       let kkk = (ii == 1) ? kk.times(type3) : kk;

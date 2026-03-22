@@ -44,6 +44,7 @@ div.grid {
 #headerdiv {
   grid-auto-flow:column;
   grid-template-rows: 1fr;
+  grid-template-columns: auto 1fr;
   height: 270px;
   overflow: hidden;
   transition-duration: 0.3s;
@@ -110,10 +111,13 @@ div.grid {
 
 #openerdiv #conditiondiv {
   grid-auto-flow: column;
-  grid-template-columns: 70px 70px 70px 1fr auto auto auto;
+  grid-template-columns: 70px 50px 1fr;
   height: 38px;
   width: 100%;
   font-weight: bold;
+}
+#conditiondiv{
+  gap: 6px;
 }
 #openerdiv #conditiondiv>div {
   white-space: nowrap;
@@ -125,6 +129,15 @@ div.grid {
 #openerdiv #conditiondiv #condition-date {
   max-width: 100px;
   min-width: 90px;
+}
+
+#condition-expantion-container{
+  margin-left: 6px;
+  gap: 12px;
+}
+#condition-level
+, #condition-rank{
+  width: fit-content;
 }
 
 
@@ -301,7 +314,7 @@ input.error {
 
 #cubeinfodiv {
   grid-auto-flow: column;
-  grid-template-columns: 72px repeat(4, 1fr);
+  grid-template-columns: repeat(5, 1fr);
   grid-template-rows: 0px auto repeat(4, 50px) 0px;
 }
 #cubeinfodiv div.none {
@@ -343,6 +356,7 @@ input.error {
 }
 #cubeinfodiv .head{
   background-color: #fafafa;
+  min-width: 54px;
 }
 
 #potentialdiv .potential-auto>input{
@@ -504,21 +518,28 @@ input.error {
 
 
 /* 出力テーブル切り替えボタン */
+:root{
+  --exporttype-div-height: 30px;
+  --exporttype-input-height: 32px;
+}
+#exporttype1input:disabled{
+  display: none;
+}
 #exporttype1div
 , #exporttype2div
 , #exporttype3div{
+  align-content: center;
   align-self: center;
-  display: flex;
   align-items: center;
+  display: flex;
   cursor: pointer;
   background: #f9f9f9;
   color: #555;
   font-weight: bold;
   border: 2px #555 solid;
   border-radius: 5px;
+  height: var(--exporttype-div-height);
   padding: 0px 6px;
-  margin: 0px 6px 0px 0px;
-  height: 30px;
 }
 #exporttype3div{
   background: transparent;
@@ -526,7 +547,8 @@ input.error {
   padding: 0px;
   border-radius: 0px;
   position: relative;
-  height: 34px;
+  height: 100%;
+  margin-right: 6px;
 }
 #exporttype3div::before{
   content: "x";
@@ -538,12 +560,22 @@ input.error {
   align-items: center;
   padding-left: 5px;
 }
-input#exporttype3{
-  padding: 0 6px 0 16px;
-  height: calc(100% - 1px * 2);
+#exporttype3{
   width: 32px;
+}
+input#exporttype1input
+, input#exporttype3{
+  padding: 0 6px;
+  height: var(--exporttype-input-height);
   background-color: white;
   border:solid 1px gray;
   border-radius: 5px;
   text-align: right;
+}
+#exporttype1input{
+  width: 34px;
+  align-self: center;
+}
+#exporttype3{
+  padding-left: 16px !important;
 }
