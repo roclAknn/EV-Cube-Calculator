@@ -34,9 +34,13 @@ window.checkedapplyerrlist = true;
 BigNumber.config({ DECIMAL_PLACES: 25 }); // 計算精度
 window.calcRoundDegit = 25; // 出力累積計算の丸め位置
 window.exportRoundDegit = 12; // 出力結果の丸め位置
+BigNumber.one  = BigNumber(1); //頻出キャッシュ
+BigNumber.zero = BigNumber(0); 
 
 /* Decimal.jsの設定　有効桁数精度 */
 Decimal.set({ precision: 40 }); // 計算制度
+Decimal.one  = Decimal(1);
+Decimal.zero = Decimal(0);
 
 /*===== ページロード後初期化処理 ===============================================*/
 function initialize(){
@@ -304,9 +308,9 @@ createTable.switch = function(){
   let list2 = {};
   
   let keys = Object.keys(list).sort((a,b)=>{/* スコア降順ソート */ return (+a < +b) - (+a > +b)});
-  let r = new BigNumber(0);
-  let zero = new BigNumber(0);
-  let one = new BigNumber(1);
+  let zero = BigNumber.zero;
+  let one = BigNumber.one;
+  let r = zero;
   let e50 = new Decimal(2).ln().times(-1);
   let e05 = new Decimal(20).ln().times(-1);
   let deci1 = new Decimal(1);
@@ -314,6 +318,7 @@ createTable.switch = function(){
   
   let type1primary = type1.match(/^num|^prob/)?.at(0);
   let type1secondary = type1primary ? type1.match(new RegExp(type1primary + "(.+)")).at(1) : null;
+  
   for(let v of keys){
     let rr = list[v];
     if     ( rr.gt(1) ) rr = one;
@@ -660,29 +665,45 @@ function closeDropdowns(event) {
 
 /*========= 計算処理 ================================================*/
 class scoredata{
-  vals = [0, 0];
+  vals = [BigNumber.zero, BigNumber.zero];
   constructor({input, eid, rankidx, val}){
     this.input = input;
     this.eid = eid;
     this.add(rankidx, val);
   }
   add(rankidx, val){
-    this.vals[rankidx] += val;
+    this.vals[rankidx] = this.vals[rankidx].plus(val);
   }
   div(rankidx, val){
-    this.vals[rankidx] = new BigNumber( this.vals[rankidx] ).div(val);
+    this.vals[rankidx] = this.vals[rankidx].div(val);
   }
 }
 
 class errdata{
-  probs = [new BigNumber(0), new BigNumber(0)]; // [上級, 下級]
-  counts = []; // eidごとの現在付与行数
-  capped = []; // eidごとの制限到達チェック(キャッシュ)
-  constructor(edata){
-    if (!edata) return;
-    this.probs = [...edata.probs];
-    this.counts = [...edata.counts];
-    this.capped = [...edata.capped];
+  probs = [BigNumber.zero, BigNumber.zero]; // [上級, 下級]
+  counts = new Uint8Array(20); // eidごとの現在付与行数
+  capped = new Uint8Array(20); // eidごとの制限到達チェック(キャッシュ)
+  hasCapped = false; // 制限に到達しているものがあるか（キャッシュ）
+  
+  _stack = [];
+  
+  store(eid){
+    this._stack.push({
+      eid,
+      probs: [this.probs[0], this.probs[1]],
+      counts: this.counts[eid],
+      capped: this.capped[eid],
+      hasCapped: this.hasCapped
+    });
+  }
+  
+  restore(){
+    const s = this._stack.pop();
+    
+    this.probs = s.probs;
+    this.counts[s.eid] = s.counts;
+    this.capped[s.eid] = s.capped;
+    this.hasCapped = s.hasCapped;
   }
 }
 
@@ -720,8 +741,9 @@ function ondo(){
   let errlist2 = data.potentialerrorlist2;
   
   let scores = [];
+  let scoremap = new Map();
   let maxscore = 0; /* 全スコア未入力判定用 */
-  
+  let maxeid = -1;
   for(let i = 0; i < inputscores.length; i++){
     let inputscore = inputscores[i];
     let val = inputscore.value.trim();
@@ -749,18 +771,17 @@ function ondo(){
     if( !applyerrlist || eid == undefined ) eid = -1;
     let bool = true;
     
-    for (let sc of scores){
+    const key = val + "|" + eid;
+    let sc = scoremap.get(key);
+    if (sc){
       /* スコアとエラーグループが一致するデータがあれば加算する */
-      if (sc.input == val && sc.eid == eid){
-        sc.add(n, w);
-        bool = false;
-        break;
-      }
-    }
-    /* 新規スコアなら追加 */
-    if( bool ){
+      sc.add(n, w);
+    } else {
+      /* 新規グループなら追加する */
       if( maxscore < val ) maxscore = val;
-      scores.push(new scoredata({input: val, eid, rankidx: n, val: w}));
+      sc = new scoredata({input: BigNumber(val), eid, rankidx: n, val: w});
+      scoremap.set(key, sc);
+      scores.push(sc);
     }
   }
   
@@ -769,105 +790,164 @@ function ondo(){
     sc.div(1, weights[1][0]);
   }
   
+  // スコアをinput降順→eid昇順でソート
+  scores.sort((a, b) =>
+    b.input.comparedTo(a.input) || a.eid - b.eid
+  );
   
-  let vs = [], rs = [];
+  let vs = [];
   let result = {};
   
+  let start = new Date();
   if( 0 < maxscore ){
-    calc( 0, maxline, new errdata() );
+    calc( 0, maxline, new errdata(), scores );
   }else{
-    result["0"] = new BigNumber(1);
+    result["0"] = BigNumber.one;
   }
   
   return result;
   
-  
   /* line=line～maxline-1の再帰処理 */
-  function calc(line=0, maxline=3, edata ){
+  function calc(line=0, maxline=3, edata, scores, prob = BigNumber.one, topscores = []){
     
     /**
     * 重複エラー処理について
     * KMS公式より：１行目から設定していき、潜在重複エラーならその行の等級抽選からやり直す？
     */
     
-    // line-1行までに制限潜在があれば制限処理
+    const  one = BigNumber.one
+    ,     zero = BigNumber.zero;
+    
+    // ヘキサキューブ用スコア足切り
+    let scores2 = scores;
+    if ( 3 < maxline ){
+      let isUpdateTopscores = false;
+      // スコア上位3行を格納したtopscoresを作成
+      if ( 3 == line ){
+        // 4行目開始(vs.length=3)の時点でコピーを作成し昇順ソート
+        topscores = [...vs];
+        topscores.sort( (a, b) => a.comparedTo(b) );
+        isUpdateTopscores = true;
+      } else if(3 < line){
+        let v = vs[line-1];
+        if ( topscores[0].lt(v) ){
+          // 昇順になるように挿入位置を決める
+          let idx = 0;
+          for (let i = 1; i < 3; i++){
+            if (topscores[i].lt(v)) idx++;
+            else break;
+          }
+          topscores.shift();
+          topscores.splice(idx, 0, v);
+          isUpdateTopscores = true;
+        }
+      }
+      if (isUpdateTopscores){
+        let topsum = topscores.reduce( (sum, sc) => sum.plus(sc) );
+        if ( topsum.gte( scores[0].input.times(3) ) ){
+          // 理論最大値なので強制終了する
+          setResult(vs, prob);
+          return;
+        }
+        // 足切りしたスコアの作成
+        scores2 = [];
+        let cutScore0 = new scoredata({input: zero, eid: -1, rankidx: 0, val: 0});
+        let isCut = false;
+        scores.forEach( sc => {
+          if ( sc.eid < 0 && sc.input.lt( topscores[0] ) ){
+            cutScore0.add( 0, sc.vals[0] );
+            cutScore0.add( 1, sc.vals[1] );
+            isCut = true;
+          }
+          else scores2.push(sc);
+        });
+        if (isCut) scores2.push(cutScore0);
+      }
+    }
+    scores = scores2;
+    
+    // いずれかが重複制限に達していれば制限処理
     let eprobs = edata.probs;
-    let errprob = new BigNumber(0);
-    if( edata.capped.length ){
-      /* line行で重複制限を引く(=この行を引き直す)確率 */
-      errprob = eprobs[0].times( cuberankrate[line][0] ).plus( errprob );
-      errprob = eprobs[1].times( cuberankrate[line][1] ).plus( errprob );
+    let errprob = zero;
+    if( edata.hasCapped ){
+      /* この行で重複制限を引く(=引き直す)確率 */
+      errprob = eprobs[0].times( cuberankrate[line][0] ).plus(
+                  eprobs[1].times( cuberankrate[line][1] )
+                );
     }
     
-    for(let sc of scores){
-      let r, v;
-      
+    for(let i = 0; i < scores.length; i++){
+      const sc = scores[i];
       let eid = sc.eid;
-      if( edata.capped[ eid ] ) continue; /* 重複制限チェック */
+      if( edata.capped[eid] ) continue; /* 重複制限チェック */
       
-      r =         sc.vals[0].times( cuberankrate[line][0] );
-      r = r.plus( sc.vals[1].times( cuberankrate[line][1] ) );
-      if( +r <= 0 ) continue;
+      let r =        sc.vals[0].times( cuberankrate[line][0] )
+              .plus( sc.vals[1].times( cuberankrate[line][1] ) );
+      if( r.lte(0) ) continue;
       
-      vs[line] = new BigNumber( sc.input );
-      rs[line] = r.div( new BigNumber(1).minus(errprob) );
+      vs[line] = sc.input;
       
+      let prob2 = prob.times( errprob.isZero() ? r : r.div( one.minus(errprob) ) );
+      
+      // 最終行でなければ重複制限情報を更新して再帰
       if( line+1 < maxline ){
-        let edata2 = edata;
-        if( eid < 0 ){
-        }else{
-          edata2 = new errdata(edata); // コピーを作成
-          edata2.counts[eid] = 1 + ( edata2.counts[eid] || 0 );
-          if( errlist1[eid][1] <= edata2.counts[eid] ){
-            edata2.capped[eid] = true;
+        let isChange = 0 <= eid;
+        if (isChange){
+          // 古い値を保持し、再帰終了後に戻す
+          edata.store(eid);
+          
+          const {probs, counts, capped} = edata;
+          counts[eid] = 1 + ( counts[eid] || 0 );
+          if( errlist1[eid][1] <= counts[eid] ){
+            capped[eid] = 1;
+            edata.hasCapped = true;
             for(let esc of scores){
               if( esc.eid != eid ) continue;
-              edata2.probs[0] = edata2.probs[0].plus(esc.vals[0]);
-              edata2.probs[1] = edata2.probs[1].plus(esc.vals[1]);
+              probs[0] = probs[0].plus(esc.vals[0]);
+              probs[1] = probs[1].plus(esc.vals[1]);
             }
           }
         }
-        calc(line+1, maxline, edata2);
+        calc(line+1, maxline, edata, scores, prob2, topscores);
+        if (isChange) edata.restore();
         continue;
       }
       
       /* 以降は最終行のみ処理 */
-      v = new BigNumber(0);
-      if( 3 < maxline ){ /* 仮ヘキサキューブ用 スコアの高い順にmaxline行最大3行のスコアをまとめる */
-        //vs.sort((a,b)=>{/* 降順ソート */ return (a < b) - (a > b)});
-        let v0 = 0, v1 = 0, v2 = 0;
-        for(let v of vs){
-          v = +v;
-          if(v <= 0) continue;
-          if(v2 >= v) continue;
-          if(v1 >= v){
-            v2 = v;  continue;
-          }
-          v2 = v1;
-          if(v0 >= v){
-            v1 = v;
-          }else{
-            v1 = v0;
-            v0 = v;
-          }
-        }
-        v = v.plus(v0).plus(v1).plus(v2);
-      }else{
-        for(let i = 0, imax = Math.min(maxline, 3); i < imax; i++){
-          v = v.plus(vs[i]);
-        }
-      }
-      
-      r = new BigNumber(1);
-      for( let rr of rs ){
-        r = r.times( rr );
-      }
-      
-      result["" + v] = r.plus( result["" + v] || 0 );
+      setResult(vs, prob2);
     }
     return;
   }
   
+  function setResult(vs, prob){
+    let v = BigNumber.zero;
+    if( 3 < maxline ){
+      /* ヘキサキューブ用 スコアの高い順にmaxline行最大3行のスコアをまとめる */
+      //vs.sort((a,b)=>{/* 降順ソート */ return (a < b) - (a > b)});
+      let v0 = 0, v1 = 0, v2 = 0;
+      for(let v of vs){
+        v = +v;
+        if(v <= 0) continue;
+        if(v2 >= v) continue;
+        if(v1 >= v){
+          v2 = v;  continue;
+        }
+        v2 = v1;
+        if(v0 >= v){
+          v1 = v;
+        }else{
+          v1 = v0;
+          v0 = v;
+        }
+      }
+      v = v.plus(v0).plus(v1).plus(v2);
+    }else{
+      for(let i = 0; i < maxline; i++){
+        v = v.plus(vs[i]);
+      }
+    }
+    result["" + v] = prob.plus( result["" + v] || 0 );
+  }
 }
 
 
