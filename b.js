@@ -101,7 +101,7 @@ function UIinitialize(){
     div.classList.toggle("opener", ishide);
   };
   
-  createTable([]);
+  createTable({rank: -1, cubename: "", list: []});
 }
 
 function onchangecube(){
@@ -141,6 +141,7 @@ function onchangesetting(){
   if( val === "" ) return;
   let flg = false;
   val = cubetypes[+val];
+  
   if( window.selectedcube ){
     let data = window.selectedcube[1];
     let cubename = window.selectedcube[2];
@@ -181,8 +182,9 @@ function onchangesetting(){
   /*----------------------------------------------*/
   
   /* ユニキューブかそれ以外かでmaxlineの表示を切り替える(valueはそのまま) */
+  let cubename;
   if( window.selectedcube ){
-    let cubename = window.selectedcube[2];
+    cubename = window.selectedcube[2];
     Array.apply(null, inputmaxline.options).forEach((k, i)=>{
       if( cubename == "uni" ){
         k.innerHTML = "" + (i + 1) + "行狙い";
@@ -192,8 +194,10 @@ function onchangesetting(){
     });
   }
   
-  if( eqp < 0 || eqplv < 0 || rank < 0 || maxline <= 0 ) return;
-  
+  if( eqp < 0 || eqplv < 0 || rank < 0 || maxline <= 0 ){
+    if ( 0 <= rank ) createTable({rank, cubename, list: []}); // 昇級率のみ表示する
+    return;
+  }
   conditionupdate(); /* 出力条件の表示 */
   if( flg ){
     createcubetable(); /* スコア確率表も更新される */
@@ -280,8 +284,8 @@ function setcubeinfodiv(){
   img.style.display = "block";
 }
 
-function createTable(list){/* type:出力タイプ デフォルトは期待値 */
-  createTable.list = list;
+function createTable(result){
+  createTable.result = result;
   createTable.switch();
 }
 
@@ -296,41 +300,56 @@ createTable.switch = function(){
   let type3 = document.getElementById("exporttype3").value;
   type3 = inputCalc(type3);
   if (type3 <= 0) type3 = 1;
-  // if( type3.validity.badInput ) type3 = 1;
-  // else type3 = +type3.value;
   
-  let cubename;
+  const cubedata = window.selectedcube;
+  let cubename = this.result.cubename;
   let linenum;
-  if( window.selectedcube ) cubename = window.selectedcube[2];
+  // 共通処理で空のテーブルを表示させたいため中断returnしない
   if( window.selectedmaxline ) linenum = window.selectedmaxline;
   
-  let list = this.list;
+  let list = {...this.result.list};
   let list2 = {};
   
-  let keys = Object.keys(list).sort((a,b)=>{/* スコア降順ソート */ return (+a < +b) - (+a > +b)});
   let zero = BigNumber.zero;
   let one = BigNumber.one;
   let r = zero;
   let e50 = new Decimal(2).ln().times(-1);
   let e05 = new Decimal(20).ln().times(-1);
-  let deci1 = new Decimal(1);
-  let deci0 = new Decimal(0);
+  let deci1 = Decimal.one;
+  let deci0 = Decimal.zero;
   
   let type1primary = type1.match(/^num|^prob/)?.at(0);
   let type1secondary = type1primary ? type1.match(new RegExp(type1primary + "(.+)")).at(1) : null;
   
+  let keys = Object.keys(list).sort((a,b)=>{/* スコア降順ソート */ return (+a < +b) - (+a > +b)});
+  
+  // 昇級確率を末尾に追加
+  const upgradekey = "昇級";
+  const selrank = this.result.rank;
+  let upgradeprob;
+  if ( cubedata && cubename ){
+    upgradeprob = cubedata?.at(1).upgradetable[cubename]?.at(selrank);
+    if (upgradeprob === undefined) upgradeprob = -1;
+    if (cubename == "uni" || cubename == "hexa") upgradeprob = -1;
+    keys.push(upgradekey);
+    list[upgradekey] = new BigNumber( upgradeprob );
+  }
+  
   for(let v of keys){
     let rr = list[v];
-    if     ( rr.gt(1) ) rr = one;
-    else if( rr.lt(0) ) rr = zero;
+    let isAdjust = (v == 0); /* v==0で帳尻を合わせるフラグ */
+    const isUpgradekey = (v == upgradekey);
+    const isUpgradable = (isUpgradekey && rr > 0);
     
-    /* v==0で帳尻を合わせるフラグ */
-    let isAdjust = (v == 0);
+    if (!isUpgradekey){
+      if     ( rr.gt(1) ) rr = one;
+      else if( rr.lt(0) ) rr = zero;
+    }
     
     /* ユニキューブは潜在行数を行選択確率として使う */
     /* 0スコアも潜在行数を含めた出力にする（平均値1ではなく3）行数の設定をここで確認できるようにするため */
-    if(cubename == "uni"){
-      let targetlinenum = 3-(linenum-1); // 1~3
+    if( cubename == "uni" ){
+      let targetlinenum = 3 - (linenum - 1); // 1~3
       rr = rr.times(targetlinenum).div(3);
       if (targetlinenum < 3) isAdjust = false; // 3行狙いのみ修正
     }
@@ -338,36 +357,47 @@ createTable.switch = function(){
     if(calcRoundDegit >= 0){
       rr = rr.decimalPlaces(calcRoundDegit); // 恣意的丸め(累積計算精度)
     }
-    r = r.plus(rr);
-    if     ( isAdjust ) r = one;
-    else if( r.gt(1) ) r = one;
-    else if( r.lt(0) ) r = zero;
     
+    let __r;
+    if ( isUpgradekey ){
+      __r = rr;
+    }else{
+      r = r.plus(rr);
+      if     ( isAdjust ) r = one;
+      else if( r.gt(1) ) r = one;
+      else if( r.lt(0) ) r = zero;
+      __r = r;
+    }
     
+    // log計算のため BigNumber -> Decimal に変換
+    let _rr = Decimal(rr.toString()), _r = Decimal(__r.toString());
+    let func;
     if (type1primary == "num"){
       if (type1secondary == "avg"){
-        list2[v] = [one.div(rr), one.div(r)];
+        func = a => deci1.div(a);
       } else {
-        let _rr = deci1.div( deci1.minus(rr.toString() ).ln() )
-        ,    _r = deci1.div( deci1.minus( r.toString() ).ln() );
+        if ( !isUpgradekey || isUpgradable ){
+          _rr = deci1.div( deci1.minus( _rr ).ln() );
+          _r  = deci1.div( deci1.minus(  _r ).ln() );
+        }
         switch(type1secondary){
         case "50":
-          _rr = e50.times(_rr); _r = e50.times( _r);
-          break;
+          func = a => e50.times(a); break;
         case "95":
-          _rr = e05.times(_rr); _r = e05.times( _r);
-          break;
+          func = a => e05.times(a); break;
         }
-        list2[v] = [BigNumber(_rr.toString()), BigNumber(_r.toString())]; //現状BigNumberで統一しておく
       }
     } else if(type1primary == "prob"){
-      let times = +type1secondary;
-      const calcLeastOnce = (prob, num) => Decimal(1).minus( Decimal(1).minus(prob).pow(num) );
-      // decimal.jsで計算するので文字列型で渡す
-      let _rr = calcLeastOnce(rr.toString(), cubenum).times(times)
-      ,    _r = calcLeastOnce( r.toString(), cubenum).times(times);
-      list2[v] = [BigNumber(_rr.toString()), BigNumber(_r.toString())]; //現状BigNumberで統一しておく
+      func = a => {
+        a = deci1.minus( a.toString() ).pow( cubenum );
+        return deci1.minus( a ).times( +type1secondary );
+      }
     }
+    const ffunc = a => {
+      if ( isUpgradekey && !isUpgradable ) return a;
+      return func(a);
+    }
+    list2[v] = [ BigNumber(ffunc(_rr).toString()), BigNumber(ffunc(_r).toString()) ]; //現状はBigNumberに戻しておく
   }
   list = list2;
   let showbool = ( type3 != 0 && type3 != 1 );
@@ -400,7 +430,12 @@ createTable.switch = function(){
       }
       
       let [rateint, ratedecimal] = kkk.toFixed().split(".");
-      if( ratedecimal > 0 ) rateint = "" + rateint + ".";
+      if ( ratedecimal > 0 ) rateint = "" + rateint + ".";
+      if ( k == upgradekey ){
+        if ( kkk <= 0 ){
+          rateint = "--"; ratedecimal = "";
+        }
+      }
       inner += `<div><span><span class="int">${rateint}</span><span class="decimal">${ratedecimal||""}</span></span></div>`;
     }
     table.insertAdjacentHTML("beforeend", inner);
@@ -420,12 +455,11 @@ function createcubetable(){
   
   let data     = window.selectedcube[1];
   let cubename = window.selectedcube[2];
-  //let pweights = data.weights[cubename];
   
   let ownerdiv = document.getElementById("potentialdiv");
   
   let fragment = new DocumentFragment();
-  data.exportdata = {rank, weights:[]}; /*確率出力用データ初期化*/
+  data.exportdata = {rank, cubename, weights:[]}; /*確率出力用データ初期化*/
   
   // スコアの保存
   scoretemps = [];
@@ -543,9 +577,9 @@ function oninputscore(){
   clearTimeout(oninputscore.sid);
   oninputscore.sid = setTimeout(()=>{
     let sid = oninputscore.sid;
-    let list = ondo();
+    let result = ondo();
     if( sid != oninputscore.sid ) return;
-    createTable(list);
+    createTable(result);
   }, oninputscore.delay);
 }
 
@@ -724,12 +758,12 @@ function inputCalc(expr) {
 
 function ondo(){
   
-  let data     = window.selectedcube[1];
-  let cubename = window.selectedcube[2];
+  const data     = window.selectedcube[1];
   let maxline  = window.selectedmaxline;
   let applyerrlist = window.checkedapplyerrlist;
-  let rank = data.exportdata.rank;
-  let weights = data.exportdata.weights; // [上級, 下級]
+  
+  const exportdata = data.exportdata;
+  let {rank, cubename, weights} = exportdata;
   let cuberankrate = data.ratetable[cubename][rank];
   
   let fixlinenum = data.fixlinenum[cubename];
@@ -805,7 +839,7 @@ function ondo(){
     result["0"] = BigNumber.one;
   }
   
-  return result;
+  return {rank, cubename, list: result};
   
   /* line=line～maxline-1の再帰処理 */
   function calc(line=0, maxline=3, edata, scores, prob = BigNumber.one, topscores = []){
