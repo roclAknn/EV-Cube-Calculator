@@ -147,6 +147,7 @@ div.grid {
   grid-template-columns: auto 1fr;
   border: solid #333;
   border-width: 2px 0px 0px 0px;
+  margin-bottom: -1px;
 }
 #exportdiv .wrapdiv:first-child{
   min-width: 313px;
