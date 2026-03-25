@@ -229,8 +229,14 @@ select.input-status {
   height: 24px;
   padding: 1px 4px;
 }
+select>* {
+  color: black !important;
+  font-weight: normal !important;
+}
 select.input-status:invalid{ /* 未選択状態 */
   border-bottom: double 4px #f88;
+  color: red;
+  font-weight: bold;
 }
 
 select.input-status::-ms-expand {

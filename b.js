@@ -703,7 +703,7 @@ function closeDropdowns(event) {
 
 /*========= 計算処理 ================================================*/
 class scoredata{
-  vals = [BigNumber.zero, BigNumber.zero];
+  vals = [BigNumber.zero, BigNumber.zero]; // 確率
   constructor({input, eid, rankidx, val}){
     this.input = input;
     this.eid = eid;
@@ -815,7 +815,7 @@ function ondo(){
     } else {
       /* 新規グループなら追加する */
       if( maxscore < val ) maxscore = val;
-      sc = new scoredata({input: BigNumber(val), eid, rankidx: n, val: w});
+      sc = new scoredata({input: val, eid, rankidx: n, val: w});
       scoremap.set(key, sc);
       scores.push(sc);
     }
@@ -828,7 +828,7 @@ function ondo(){
   
   // スコアをinput降順→eid昇順でソート
   scores.sort((a, b) =>
-    b.input.comparedTo(a.input) || a.eid - b.eid
+    b.input - a.input || a.eid - b.eid
   );
   
   let vs = [];
@@ -862,15 +862,15 @@ function ondo(){
       if ( 3 == line ){
         // 4行目開始(vs.length=3)の時点でコピーを作成し昇順ソート
         topscores = [...vs];
-        topscores.sort( (a, b) => a.comparedTo(b) );
+        topscores.sort( (a, b) => a - b );
         isUpdateTopscores = true;
       } else if(3 < line){
         let v = vs[line-1];
-        if ( topscores[0].lt(v) ){
+        if ( topscores[0] < v ){
           // 昇順になるように挿入位置を決める
           let idx = 0;
           for (let i = 1; i < 3; i++){
-            if (topscores[i].lt(v)) idx++;
+            if (topscores[i] < v) idx++;
             else break;
           }
           topscores.shift();
@@ -879,18 +879,19 @@ function ondo(){
         }
       }
       if (isUpdateTopscores){
-        let topsum = topscores.reduce( (sum, sc) => sum.plus(sc) );
-        if ( topsum.gte( scores[0].input.times(3) ) ){
-          // 理論最大値なので強制終了する
+        // 演算すると誤差があるので安全に比較する
+        let topsum = topscores.reduce( (sum, sc) => sum + sc );
+        if ( topsum - scores[0].input * 3 >= -1e-12 ){
+          // 理論最大値なので強制終了
           setResult(vs, prob);
           return;
         }
         // 足切りしたスコアの作成
         scores2 = [];
-        let cutScore0 = new scoredata({input: zero, eid: -1, rankidx: 0, val: 0});
+        let cutScore0 = new scoredata({input: 0, eid: -1, rankidx: 0, val: 0});
         let isCut = false;
         scores.forEach( sc => {
-          if ( sc.eid < 0 && sc.input.lt( topscores[0] ) ){
+          if ( sc.eid < 0 && sc.input <  topscores[0] ){
             cutScore0.add( 0, sc.vals[0] );
             cutScore0.add( 1, sc.vals[1] );
             isCut = true;
@@ -956,7 +957,7 @@ function ondo(){
   }
   
   function setResult(vs, prob){
-    let v = BigNumber.zero;
+    let v = 0;
     if( 3 < maxline ){
       /* ヘキサキューブ用 スコアの高い順にmaxline行最大3行のスコアをまとめる */
       //vs.sort((a,b)=>{/* 降順ソート */ return (a < b) - (a > b)});
@@ -976,13 +977,13 @@ function ondo(){
           v0 = v;
         }
       }
-      v = v.plus(v0).plus(v1).plus(v2);
+      v = v0 + v1 + v2;
     }else{
       for(let i = 0; i < maxline; i++){
-        v = v.plus(vs[i]);
+        v += vs[i];
       }
     }
-    v = v.decimalPlaces(8); // inputCalcの丸め誤差が積み上がるためより短く丸める
+    v = +v.toFixed(8); // inputCalcの丸め誤差が積み上がるためより短く丸める
     v = v.toString();
     result[v] = prob.plus( result[v] || 0 );
   }
