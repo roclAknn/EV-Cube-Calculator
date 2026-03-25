@@ -230,8 +230,11 @@ select.input-status {
   padding: 1px 4px;
 }
 select>* {
-  color: black !important;
-  font-weight: normal !important;
+  color: black;
+  font-weight: normal;
+}
+select>*:disabled {
+  color: #d0d0d0;
 }
 select.input-status:invalid{ /* 未選択状態 */
   border-bottom: double 4px #f88;
