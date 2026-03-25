@@ -313,8 +313,6 @@ createTable.switch = function(){
   let zero = BigNumber.zero;
   let one = BigNumber.one;
   let r = zero;
-  let e50 = new Decimal(2).ln().times(-1);
-  let e05 = new Decimal(20).ln().times(-1);
   let deci1 = Decimal.one;
   let deci0 = Decimal.zero;
   
@@ -324,23 +322,48 @@ createTable.switch = function(){
   let keys = Object.keys(list).sort((a,b)=>{/* スコア降順ソート */ return (+a < +b) - (+a > +b)});
   
   // 昇級確率を末尾に追加
-  const upgradekey = "昇級";
+  const upgradekey = ["昇級", "ﾐﾗｸﾙ"];
   const selrank = this.result.rank;
   let upgradeprob;
   if ( cubedata && cubename ){
     upgradeprob = cubedata?.at(1).upgradetable[cubename]?.at(selrank);
     if (upgradeprob === undefined) upgradeprob = -1;
     if (cubename == "uni" || cubename == "hexa") upgradeprob = -1;
-    keys.push(upgradekey);
-    list[upgradekey] = new BigNumber( upgradeprob );
+    keys.push(...upgradekey);
+    list[upgradekey[0]] = new BigNumber( upgradeprob );
+    list[upgradekey[1]] = new BigNumber( upgradeprob ).times(2);
+  }
+  
+  // 出力タイプに応じた処理を設定
+  let func;
+  let e50 = new Decimal(2).ln().times(-1);
+  let e05 = new Decimal(20).ln().times(-1);
+  if (type1primary == "num"){
+    if (type1secondary == "avg"){
+      func = a => deci1.div(a);
+    } else {
+      const commonfunc = (a)=>{
+        return deci1.div( deci1.minus( a ).ln() );
+      }
+      switch(type1secondary){
+      case "50":
+        func = a => e50.times(commonfunc(a)); break;
+      case "95":
+        func = a => e05.times(commonfunc(a)); break;
+      }
+    }
+  } else if (type1primary == "prob"){
+    func = a => {
+      a = deci1.minus( a.toString() ).pow( cubenum );
+      return deci1.minus( a ).times( +type1secondary );
+    }
   }
   
   for(let v of keys){
     let rr = list[v];
     let isAdjust = (v == 0); /* v==0で帳尻を合わせるフラグ */
-    const isUpgradekey = (v == upgradekey);
+    const isUpgradekey = (0 <= upgradekey.indexOf(v));
     const isUpgradable = (isUpgradekey && rr > 0);
-    
     if (!isUpgradekey){
       if     ( rr.gt(1) ) rr = one;
       else if( rr.lt(0) ) rr = zero;
@@ -368,36 +391,14 @@ createTable.switch = function(){
       else if( r.lt(0) ) r = zero;
       __r = r;
     }
-    
     // log計算のため BigNumber -> Decimal に変換
     let _rr = Decimal(rr.toString()), _r = Decimal(__r.toString());
-    let func;
-    if (type1primary == "num"){
-      if (type1secondary == "avg"){
-        func = a => deci1.div(a);
-      } else {
-        if ( !isUpgradekey || isUpgradable ){
-          _rr = deci1.div( deci1.minus( _rr ).ln() );
-          _r  = deci1.div( deci1.minus(  _r ).ln() );
-        }
-        switch(type1secondary){
-        case "50":
-          func = a => e50.times(a); break;
-        case "95":
-          func = a => e05.times(a); break;
-        }
-      }
-    } else if(type1primary == "prob"){
-      func = a => {
-        a = deci1.minus( a.toString() ).pow( cubenum );
-        return deci1.minus( a ).times( +type1secondary );
-      }
-    }
     const ffunc = a => {
       if ( isUpgradekey && !isUpgradable ) return a;
       return func(a);
     }
-    list2[v] = [ BigNumber(ffunc(_rr).toString()), BigNumber(ffunc(_r).toString()) ]; //現状はBigNumberに戻しておく
+    //現状はBigNumberに戻して格納
+    list2[v] = [ BigNumber(ffunc(_rr).toString()), BigNumber(ffunc(_r).toString()) ];
   }
   list = list2;
   let showbool = ( type3 != 0 && type3 != 1 );
@@ -417,7 +418,12 @@ createTable.switch = function(){
   
   for (let i = 0; i < keys.length; i++) {
     let k = keys[i];
-    let inner =  `<div><span>${k}</span></div>`;
+    let divstyle = "";
+    // 昇級確率行の開始を罫線で区切る
+    if ( 0 < i && k == upgradekey[0] ){
+      divstyle = "border-top: double #c0c0c0;";
+    }
+    let inner =  `<div style="${divstyle}"><span>${k}</span></div>`;
     
     let kk = (type2 == "==" ? list[k][0] : list[k][1]);
     for( let ii = 0; ii <= 1; ii++ ){
@@ -431,12 +437,10 @@ createTable.switch = function(){
       
       let [rateint, ratedecimal] = kkk.toFixed().split(".");
       if ( ratedecimal > 0 ) rateint = "" + rateint + ".";
-      if ( k == upgradekey ){
-        if ( kkk <= 0 ){
-          rateint = "--"; ratedecimal = "";
-        }
+      if ( 0 <= upgradekey.indexOf(k) &&  kkk.lte(0) ){
+        rateint = "--"; ratedecimal = "";
       }
-      inner += `<div><span><span class="int">${rateint}</span><span class="decimal">${ratedecimal||""}</span></span></div>`;
+      inner += `<div style="${divstyle}"><span><span class="int">${rateint}</span><span class="decimal">${ratedecimal||""}</span></span></div>`;
     }
     table.insertAdjacentHTML("beforeend", inner);
   }
