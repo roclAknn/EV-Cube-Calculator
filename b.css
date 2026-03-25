@@ -23,7 +23,9 @@ td, th {
   border: 1px solid #888;
   padding: 5px;
 }
-
+input, select {
+  box-sizing: border-box;
+}
 /*--------------------------------------------------------*/
 
 div.grid {
@@ -75,6 +77,10 @@ div.grid {
 }
 #settingdiv .cell.input{
   justify-content: flex-start;
+}
+#settingdiv .input-status{
+  height: 30px !important;
+  padding: 0px 6px !important;
 }
 
 #openerdiv {
@@ -206,9 +212,9 @@ div.grid {
 }
 
 input.input-status {
-  width: 40px;
-  height: 20px;
-  padding: 1px 4px;
+  width: 50px;
+  height: 30px;
+  padding: 0px 4px;
 }
 input[type="checkbox"].input-status {
   width: unset;
@@ -391,6 +397,7 @@ input.error {
 #potentialdiv .potential-score{
   padding-left: 5px;
   padding-right: 5px;
+  justify-content: center;
 }
 #potentialdiv .potential-rate{
   padding-right: 10px;
@@ -406,8 +413,8 @@ input.error {
 #potentialdiv .potential-score input {
   position: relative;
   z-index: 30000;
-  height: 23px;
-  width: 30px;
+  height: 25px;
+  width: 40px;
   padding: 0px 4px;
   margin: 0px;
   border: solid 1px gray;
@@ -446,9 +453,10 @@ input.error {
   cursor: pointer;
   padding: 1px;
   font-size: 10px;
-  height: 24px;
-  width: 24px;
-  margin-left: 1px;
+  height: 28px;
+  width: 28px;
+  margin-left: 2px;
+  box-sizing: border-box;
 }
 
 .template-dropdown {
@@ -562,7 +570,7 @@ input.error {
   padding-left: 5px;
 }
 #exporttype3{
-  width: 32px;
+  width: 55px;
 }
 input#exporttype1input
 , input#exporttype3{
@@ -574,7 +582,7 @@ input#exporttype1input
   text-align: right;
 }
 #exporttype1input{
-  width: 34px;
+  width: 50px;
   align-self: center;
 }
 #exporttype3{

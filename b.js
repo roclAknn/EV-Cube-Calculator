@@ -745,7 +745,7 @@ class errdata{
   }
 }
 
-/* スコア入力に式を許可する */
+/* スコア入力などに式を許可する */
 function inputCalc(expr) {
   if (expr.trim() == "") return 0;
   try{
@@ -754,7 +754,8 @@ function inputCalc(expr) {
       throw new Error("invalid characters");
     }
     
-    return Function(`"use strict"; return (${expr})`)();
+    let ret = Function(`"use strict"; return (${expr})`)();
+    return +ret.toFixed(12); //浮動小数誤差補正
   }catch(ex){
     return -1;
   }
@@ -787,10 +788,7 @@ function ondo(){
     let val = inputscore.value.trim();
     if ( /^[+\-*/]/.test(val) ) val = inputscore.autoinput + val;
     val = inputCalc(val);
-    /*
-    let val = inputscore.value;
-    val = inputscore.validity.badInput ? -1 : +val;
-    */
+    
     if(inputscore.parentElement.style.display == "none"){
       val = 0;
     }else{
@@ -984,7 +982,9 @@ function ondo(){
         v = v.plus(vs[i]);
       }
     }
-    result["" + v] = prob.plus( result["" + v] || 0 );
+    v = v.decimalPlaces(8); // inputCalcの丸め誤差が積み上がるためより短く丸める
+    v = v.toString();
+    result[v] = prob.plus( result[v] || 0 );
   }
 }
 
