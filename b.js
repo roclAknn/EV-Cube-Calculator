@@ -323,6 +323,8 @@ createTable.switch = function(){
   
   // 昇級確率を末尾に追加
   const upgradekey = ["昇級", "ﾐﾗｸﾙ"];
+  const applymiracle = ["red", "black", "additional"];
+  const isApplyMiracle = (0 <= applymiracle.indexOf(cubename));
   const selrank = this.result.rank;
   let upgradeprob;
   if ( cubedata && cubename ){
@@ -331,7 +333,8 @@ createTable.switch = function(){
     if (cubename == "uni" || cubename == "hexa") upgradeprob = -1;
     keys.push(...upgradekey);
     list[upgradekey[0]] = new BigNumber( upgradeprob );
-    list[upgradekey[1]] = new BigNumber( upgradeprob ).times(2);
+    list[upgradekey[1]] = list[upgradekey[0]].times(2);
+    if (!isApplyMiracle) list[upgradekey[1]] = new BigNumber( -1 );
   }
   
   // 出力タイプに応じた処理を設定
