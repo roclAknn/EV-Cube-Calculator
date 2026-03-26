@@ -11,7 +11,7 @@ const cubetypes = [
 , ["KMS/怪しいアディショナルキューブ", additionalKMS, "rareadditional", 6]
 
 , ["TMS/ユニキューブ", regularTMS, "uni", 7]
-, ["非公式/ヘキサキューブ(KMS無償テーブル)", regularKMS, "hexa", 8]
+, ["***/ヘキサキューブ(KMS無償テーブル)", regularKMS, "hexa", 8]
 ];
 
 const cubegroups = [
