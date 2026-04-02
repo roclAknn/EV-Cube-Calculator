@@ -189,7 +189,7 @@ function onchangesetting(){
   
   if ( tempExport.cubename ){
     if( tempExport.eqp < 0 || tempExport.lv < 0 || tempExport.rank < 0 || window.selectedmaxline <= 0 ){
-      if ( 0 <= tempExport.rank ) createTable({rank, cubename, list: []}); // 昇級率のみ表示する
+      if ( 0 <= tempExport.rank ) createTable({rank: tempExport.rank, cubename: tempExport.cubename, list: []}); // 昇級率のみ表示する
       return;
     }
     
