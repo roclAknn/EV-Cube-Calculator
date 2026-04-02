@@ -137,54 +137,46 @@ function onchangesetting(){
   let inputmaxline  = document.getElementById("input-maxline");
   let inputapplyerr = document.getElementById("input-applyerrlist");
   
+  let tempExport = {};
+  
   let val = inputcube.value;
   if( val === "" ) return;
   let flg = false;
   val = cubetypes[+val];
-  
-  if( window.selectedcube ){
-    let data = window.selectedcube[1];
-    let cubename = window.selectedcube[2];
-    let temp = data.equipmentpotential[cubename];
-    data = val[1];
-    cubename = val[2];
-    if( temp != data.equipmentpotential[cubename] ) flg = true;
+  if (val){
+    tempExport.cubename = val[2];
+    window.selectedcube = val;
   }
-  window.selectedcube = val;
-  
   
   val = inputeqp.value;
-  if( val === "" ) val = -1;
-  if( window.selectedequipmenttype != +val ) flg = true;
-  let eqp = window.selectedequipmenttype = +val;
+  val = val === "" ? -1 : +val;
+  tempExport.eqp = val;
+  window.selectedequipmenttype = +val;
   
-  val = inputeqplv.validity.badInput ? -1 : +inputeqplv.value;
+  val = inputeqplv.validity.badInput ? -1 : +inputeqplv.value; // "" is 0
+  if (val < 0) val = -1;
   inputeqplv.classList.toggle("error", val < 0);
-  if( window.selectedequipmentlevel != val ) flg = true;
-  let eqplv = window.selectedequipmentlevel = val;
+  tempExport.lv = val
+  window.selectedequipmentlevel = val;
   
   val = inputrank.value;
-  if( val === "" ) val = -1;
-  if( window.selectedrank != +val ) flg = true;
-  let rank = window.selectedrank = +val;
+  val = val === "" ? -1 : +val;
+  tempExport.rank = val;
+  window.selectedrank = +val;
   
   /* 行数は潜在一覧出力には影響しない */
-  let flg2 = false;
   val = +inputmaxline.value;
-  if( window.selectedmaxline != val )flg2 = true;
-  let maxline = window.selectedmaxline = val;
+  window.selectedmaxline = val;
   
   /* 重複制限は潜在一覧出力には影響しない */
   val = +inputapplyerr.checked;
-  if( window.checkedapplyerrlist != val ) flg2 = true;
-  let applyerrlist = window.checkedapplyerrlist = val
+  window.checkedapplyerrlist = val
   
   /*----------------------------------------------*/
   
   /* ユニキューブかそれ以外かでmaxlineの表示を切り替える(valueはそのまま) */
-  let cubename;
-  if( window.selectedcube ){
-    cubename = window.selectedcube[2];
+  let cubename = tempExport.cubename;
+  if( cubename ){
     Array.apply(null, inputmaxline.options).forEach((k, i)=>{
       if( cubename == "uni" ){
         k.innerHTML = "" + (i + 1) + "行狙い";
@@ -194,15 +186,27 @@ function onchangesetting(){
     });
   }
   
-  if( eqp < 0 || eqplv < 0 || rank < 0 || maxline <= 0 ){
-    if ( 0 <= rank ) createTable({rank, cubename, list: []}); // 昇級率のみ表示する
-    return;
-  }
-  conditionupdate(); /* 出力条件の表示 */
-  if( flg ){
-    createcubetable(); /* スコア確率表も更新される */
-  }else{
-    createTable(ondo());
+  
+  if ( tempExport.cubename ){
+    if( tempExport.eqp < 0 || tempExport.lv < 0 || tempExport.rank < 0 || window.selectedmaxline <= 0 ){
+      if ( 0 <= tempExport.rank ) createTable({rank, cubename, list: []}); // 昇級率のみ表示する
+      return;
+    }
+    
+    conditionupdate(); /* 出力条件の表示 */
+    let flg = false;
+    let data = window.selectedcube[1];
+    let exportdata = data.exportdata || {};
+    // 確率テーブルに変更があれば全更新
+    Object.keys(tempExport).forEach( k => {
+      if ( flg ) return;
+      if ( tempExport[k] !== exportdata[k] ) flg = true;
+    });
+    if( flg ){
+      createcubetable(tempExport); // 潜在テーブル表を更新し、スコア表も更新
+    }else{
+      createTable(ondo()); // スコア表のみ更新
+    }
   }
   
 }
@@ -454,19 +458,14 @@ createTable.switch = function(){
 };
 
 window.scoretemps = [];
-function createcubetable(){
-  
-  let eqp  = window.selectedequipmenttype;
-  let rank = window.selectedrank;
-  let lv   = window.selectedequipmentlevel;
-  
+function createcubetable(exportdata){
   let data     = window.selectedcube[1];
-  let cubename = window.selectedcube[2];
+  let {cubename, eqp, rank, lv} = exportdata;
+  data.exportdata = {...exportdata, weights:[]}; /*出力中のデータ更新*/
   
   let ownerdiv = document.getElementById("potentialdiv");
   
   let fragment = new DocumentFragment();
-  data.exportdata = {rank, cubename, weights:[]}; /*確率出力用データ初期化*/
   
   // スコアの保存
   scoretemps = [];
@@ -773,7 +772,7 @@ function ondo(){
   const exportdata = data.exportdata;
   let {rank, cubename, weights} = exportdata;
   let cuberankrate = data.ratetable[cubename][rank];
-  
+
   let fixlinenum = data.fixlinenum[cubename];
   if(fixlinenum > 0) maxline = fixlinenum;
   
@@ -848,7 +847,6 @@ function ondo(){
   
   /* line=line～maxline-1の再帰処理 */
   function calc(line=0, maxline=3, edata, scores, prob = BigNumber.one, topscores = []){
-    
     /**
     * 重複エラー処理について
     * KMS公式より：１行目から設定していき、潜在重複エラーならその行の等級抽選からやり直す？
