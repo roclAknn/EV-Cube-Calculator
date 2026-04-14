@@ -474,7 +474,8 @@ function createcubetable(exportdata){
     let vals = document.getElementsByClassName("potential-val");
     let scores = document.querySelectorAll(".potential-score>input");
     for(let i = 0; i < names.length; i++){
-      if( scores[i].value > 0 ){
+      let valtype = checkValueType( scores[i].value );
+      if( valtype >= 1 ){
         scoretemps.push( {name: names[i].innerHTML, val: vals[i].innerHTML, score: scores[i].value} );
       }
     }
@@ -593,7 +594,8 @@ function onautoinput(){
   let score = this.score;
   
   let val = score.value.trim();
-  if ( /^[+\-*/]/.test(val) ) val = score.autoinput + val;
+  let valtype = checkValueType(val);
+  if (valtype == 3) val = score.autoinput + val;
   let sc = inputCalc(val);
   // let sc = score.validity.badInput ? -1 : +score.value;
   
@@ -763,6 +765,21 @@ function inputCalc(expr) {
   }
 }
 
+/*
+* ret
+* -1: 無効な値, 0: zero, 1: 数値(0より大きい実数), 2: 式, 3: 自動入力への演算
+*/
+function checkValueType(val){
+  val = val.trim();
+  if ( !isNaN(val) ){
+    if ( +val < 0 ) return -1;
+    return 0 < +val ? 1 : 0;
+  }
+  if ( /^[+\-*/]/.test(val) ) return 3;
+  let num = inputCalc(val);
+  return num < 0 ? -1 : 2;
+}
+
 function ondo(){
   
   const data     = window.selectedcube[1];
@@ -788,14 +805,15 @@ function ondo(){
   for(let i = 0; i < inputscores.length; i++){
     let inputscore = inputscores[i];
     let val = inputscore.value.trim();
-    if ( /^[+\-*/]/.test(val) ) val = inputscore.autoinput + val;
+    let valtype = checkValueType(val);
+    if ( valtype == 3 ) val = inputscore.autoinput + val;
     val = inputCalc(val);
     
     if(inputscore.parentElement.style.display == "none"){
       val = 0;
     }else{
-      inputscore.classList.toggle("error", val < 0);
-      if( val < 0 ) val = 0;
+      inputscore.classList.toggle("error", valtype < 0);
+      if( valtype < 0 ) val = 0;
     }
     
     let n = ( i < weights[0].length - 1 ) ? 0 : 1;
