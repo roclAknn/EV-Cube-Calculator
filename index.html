@@ -6,6 +6,7 @@
     <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=0,viewport-fit=cover" />
     <meta name="google-site-verification" content="vkAHjrHWlxI9ch267E96FHR8p9ajVqys8hCnFSBES8A" />
     <meta name="description" content="メイプルストーリー計算ツール　潜在能力を重複させるのにキューブがいくつ必要か表示します" />
+    <link rel="stylesheet" href="header.css">
     <link rel="stylesheet" href="b.css">
     <link rel="icon" href="images/favicon.ico" type="image/x-icon">
     <script data-goatcounter="https://roclaknn.goatcounter.com/count" async src="goatcounter.js"></script>
@@ -19,15 +20,67 @@
   </head>
   <body onload="initialize()">
     <header>
-      <h3 style="margin-top: 0;">/MapleStory/ キューブの確率計算器</h3>
-      <h5 style="margin-top: 0; text-align: right; margin-right: 60px;">
-        <a target="_blank" href="https://github.com/roclAknn/EV-Cube-Calculator">GitHub(使い方)</a><br>
-        <a target="_blank" href="https://roclaknn.github.io/EV-RebirthFlame/index.html">転生の炎計算器</a><br>
+      <div class="header-dropdown-wrapper">
+      <div class="icon-btn" id="menu-btn" title="メニュー" onclick="toggleMenu()">
+        <svg viewBox="0 0 16 16"><rect x="1" y="2.5" width="14" height="1.8" rx="0.9"/><rect x="1" y="7.1" width="14" height="1.8" rx="0.9"/><rect x="1" y="11.7" width="14" height="1.8" rx="0.9"/></svg>
+      </div>
+    
+      <div class="dropdown" id="dropdown">
+        <a target="_blank" href="https://github.com/roclAknn/EV-Cube-Calculator">GitHub(使い方)</a>
+        <a target="_blank" href="https://roclaknn.github.io/EV-RebirthFlame/index.html">転生の炎計算器</a>
         <a target="_blank" href="https://roclaknn.github.io/MapleStory-StatusCalc/">ステータス効率計算器</a>
-      </h5>
+      </div>
+      </div>
+    
+      <span class="header-title">/MapleStory/ キューブの確率計算器</span>
+    
+      <div class="header-alignbtn" onclick="changeAlign()">
+        <div class="icon-btn active" id="align-left" title="左揃え">
+          <svg viewBox="0 0 16 16"><rect x="1" y="2" width="14" height="2" rx="1"/><rect x="1" y="6" width="9" height="2" rx="1"/><rect x="1" y="10" width="12" height="2" rx="1"/><rect x="1" y="14" width="7" height="2" rx="1"/></svg>
+        </div>
+        <div class="icon-btn" id="align-center" title="中央揃え">
+          <svg viewBox="0 0 16 16"><rect x="1" y="2" width="14" height="2" rx="1"/><rect x="3.5" y="6" width="9" height="2" rx="1"/><rect x="2" y="10" width="12" height="2" rx="1"/><rect x="4.5" y="14" width="7" height="2" rx="1"/></svg>
+        </div>
+        <div class="icon-btn" id="align-right" title="右揃え">
+          <svg viewBox="0 0 16 16"><rect x="1" y="2" width="14" height="2" rx="1"/><rect x="6" y="6" width="9" height="2" rx="1"/><rect x="3" y="10" width="12" height="2" rx="1"/><rect x="8" y="14" width="7" height="2" rx="1"/></svg>
+        </div>
+      </div>
     </header>
+    <script>
+      function toggleMenu(){
+        const d=document.getElementById('dropdown');
+        const b=document.getElementById('menu-btn');
+        const open=d.classList.toggle('open');
+        b.classList.toggle('active',open);
+      }
+      document.addEventListener('click',function(e){
+        if(!e.target.closest('#menu-btn')&&!e.target.closest('#dropdown')){
+          document.getElementById('dropdown').classList.remove('open');
+          document.getElementById('menu-btn').classList.remove('active');
+        }
+      });
+      function changeAlign(pos = ""){
+        const aligns = ["left", "center", "right"];
+        const parentClass = "header-alignbtn"
+        let active = document.querySelector(`.${parentClass} .icon-btn.active`);
+        if ( aligns.indexOf(pos) < 0 ){
+          pos = active.id.split("-")[1];
+          let p = aligns.indexOf(pos) + 1;
+          pos = aligns[p % aligns.length];
+        }
+        active.classList.remove("active");
+        const elem = document.querySelector(`.${parentClass} #align-${pos}`);
+        elem.classList.add('active');
+        // 配置の適用
+        const main = document.getElementsByTagName("main")[0];
+        main.style.textAlign = pos;
+        // cookieの書き込み
+        setCookie("align", pos);
+      }
+    </script>
     
     <main>
+    <div id="maindiv-wrapper">
     <div id="maindiv" class="grid" style="">
       <div id="headerdiv" class="grid" style="">
         <div id="settingdiv" class="grid" style="">
@@ -118,7 +171,7 @@
             <div id="condition-rank"></div>
           </div>
           
-          <input id="exporttype1input" class="no-spin" oninput="createTable.switch();"value="1" type="text" inputmode="decimal" disabled>
+          <input id="exporttype1input" class="no-spin" oninput="createTable.switch();" value="1" type="text" inputmode="decimal" disabled>
           <div id="exporttype1div"></div>
           <select id="exporttype1" hidden></select>
           <div id="exporttype2div"></div>
@@ -200,6 +253,8 @@
           <div id="tablediv"></div>
         </div>
       </div>
+    </div>
+    </div>
     </main>
     <script>
       {
@@ -260,11 +315,24 @@
         }
       }
     </script>
-  
-
-    <footer>
-      <!-- フッターの内容 -->
-    </footer>
+    <script>
+      /* cookie */
+      function setCookie(name, value, days = 365) {
+        const expires = new Date(Date.now() + days * 864e5).toUTCString();
+        document.cookie = `${name}=${encodeURIComponent(value)}; expires=${expires}; path=/`;
+      }
+      
+      function getCookie(name) {
+        return document.cookie.split("; ").reduce((r, v) => {
+          const [key, val] = v.split("=");
+          return key === name ? decodeURIComponent(val) : r;
+        }, null);
+      }
+      
+      // cookieから揃え位置を復元
+      let pos = getCookie("align");
+      changeAlign(pos || "left"); //cookieへの追加もされる
+    </script>
     
     
     

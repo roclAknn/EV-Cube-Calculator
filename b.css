@@ -3,11 +3,9 @@
 
 body {
   font-family: Arial, sans-serif, Meiryo, Roboto Mono, Roboto;
-  min-width: 520px;
-  max-width: 780px;
-  margin: 10px;
   background: #f0f0f0;
   color: #333;
+  margin: 0;
 }
 
 header {
@@ -32,6 +30,19 @@ div.grid {
   display: grid;
 }
 
+main {
+  display: block;
+  text-align: left;
+}
+
+#maindiv-wrapper {
+  display: inline-block;
+  vertical-align: top;
+  width: fit-content;
+  min-width: 520px;
+  max-width: 780px;
+}
+
 #maindiv {
   grid-auto-flow: row;
   grid-template-columns: 1fr;
@@ -41,6 +52,7 @@ div.grid {
   width: fit-content;
   height: fit-content;
   overflow: hidden;
+  margin: 0 10px;
 }
 
 #headerdiv {
