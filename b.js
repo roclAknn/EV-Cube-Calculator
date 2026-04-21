@@ -82,7 +82,7 @@ function UIinitialize(){
   sel = document.getElementById("input-potentialrank");
   inner = "";
   for(let i = 0; i < 4; i++){
-    inner += `<option value=${i}>${commons.ranknames[i]}</option>`;
+    inner += `<option value=${i} ${i==0 ? "selected" : ""}>${commons.ranknames[i]}</option>`;
   }
   sel.innerHTML += inner;
   sel.disabled = false;
@@ -101,6 +101,7 @@ function UIinitialize(){
     div.classList.toggle("opener", ishide);
   };
   
+  onchangesetting();
   createTable({rank: -1, cubename: "", list: []});
 }
 
@@ -114,15 +115,21 @@ function onchangecube(){
   let ratetable = data.ratetable[cubename];
   
   let sel = document.getElementById("input-potentialrank");
+  let isSelected = false;
+  let primary = null;
   for( let opt of sel.options ){
     let val = opt.value;
-    if( val === "") continue;
+    if( val === "" ) continue;
     if( ratetable[+val] ){
       opt.disabled = false;
+      if( opt.selected ) isSelected = true;
+      if( primary == null ) primary = opt;
     }else{
       opt.disabled = true;
-      if( opt.selected ) sel.selectedIndex = 0;
     }
+  }
+  if(!isSelected){
+    sel.selectedIndex = primary == null ? 0 : primary.index;
   }
   onchangesetting();
   setcubeinfodiv();
