@@ -47,7 +47,7 @@ main {
   width: fit-content;
   height: fit-content;
   overflow: hidden;
-  margin: 0 10px;
+  margin: 0 10px 10px 10px;
 }
 
 #headerdiv {
