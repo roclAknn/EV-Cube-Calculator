@@ -13,7 +13,7 @@ header{
   padding:0 16px;
   height: 40px;
   border-bottom: 0.5px solid #1d1d1d;
-  background: white;;
+  background: var(--header-background-color);
   gap: 12px;
   position: relative;
   margin-bottom: 10px;

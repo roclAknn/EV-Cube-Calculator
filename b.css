@@ -8,11 +8,6 @@ body {
   margin: 0;
 }
 
-header {
-  display: flex;
-  justify-content: space-between;
-}
-
 table {
   border-collapse: collapse;
 }
@@ -321,19 +316,19 @@ select.input-status::-ms-expand {
 }
 
 .legendary{
-  background-color: #ddffcc;
+  background-color: #e2fdd2;
 }
 .unique{
-  background-color: #ffeecc;
+  background-color: #feefce;
 }
 .epic{
-  background-color: #eeccff;
+  background-color: #f3d9fb;
 }
 .rare{
-  background-color: #cceeff;
+  background-color: #daf0fe;
 }
 .normal{
-  background-color: #f5f5f5;
+  background-color: #f0f0f0;
 }
 
 input.error {
