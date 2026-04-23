@@ -33,7 +33,15 @@
       </div>
     
       <span class="header-title">/MapleStory/ キューブの確率計算器</span>
-    
+        
+      <div class="header-scalingbtn" onclick="fitScale()">
+        <div class="icon-btn" title="画面に合わせる">
+          <svg viewBox="0 0 16 16">
+            <rect x="0" y="1" width="1" height="14" rx="1"/><rect x="15" y="1" width="1" height="14" rx="1"/>
+            <rect x="1" y="8" width="14" height="1" rx="0.5"/><path d="M1 8.5l3-3v6zM15 8.5l-3-3v6z"/>
+          </svg>
+        </div>
+      </div>
       <div class="header-alignbtn" onclick="changeAlign()">
         <div class="icon-btn active" id="align-left" title="左揃え">
           <svg viewBox="0 0 16 16"><rect x="1" y="2" width="14" height="2" rx="1"/><rect x="1" y="6" width="9" height="2" rx="1"/><rect x="1" y="10" width="12" height="2" rx="1"/><rect x="1" y="14" width="7" height="2" rx="1"/></svg>
@@ -59,24 +67,78 @@
           document.getElementById('menu-btn').classList.remove('active');
         }
       });
+      function fitScale(type = ""){
+        const types = ["fit", "default"];
+        const btn = document.querySelector(".header-scalingbtn");
+        if ( types.indexOf(type) < 0 ){
+          let stat = btn.stat || "";
+          let p = types.indexOf(stat) + 1;
+          type = types[p % types.length];
+        }
+        
+        btn.stat = type;
+        btn.classList[ type == "fit" ? "add" : "remove" ]("pressed");
+        
+        // スケーリングの適用
+        const main = document.getElementsByTagName("main")[0];
+        const content = document.querySelector("#maindiv-wrapper");
+        
+        let sc = 1;
+        switch (type){
+          case "fit":
+            sc = Math.min(1, main.clientWidth / content.scrollWidth);
+            resizeObserver.observe(main);
+            resizeObserver.observe(content);
+            break;
+          default:
+            resizeObserver.unobserve(main);
+            resizeObserver.unobserve(content);
+            break;
+        }
+        console.log(sc, main.clientWidth, content.scrollWidth);
+        content.style.scale = sc;
+        
+        if (type == "fit" && sc < 1){
+          main.classList.add("fit");
+        } else {
+          main.classList.remove("fit");
+        }
+        
+        // cookieの書き込み
+        setCookie("scale", type);
+      }
+      
+      // リサイズObserver
+      const resizeObserver = new ResizeObserver(entries => {
+        // for (let entry of entries) {}
+        fitScale("fit");
+      });
+      
       function changeAlign(pos = ""){
         const aligns = ["left", "center", "right"];
-        const parentClass = "header-alignbtn"
-        let active = document.querySelector(`.${parentClass} .icon-btn.active`);
+        const parent = document.querySelector(".header-alignbtn");
+        let active = parent.querySelector(`.icon-btn.active`);
         if ( aligns.indexOf(pos) < 0 ){
           pos = active.id.split("-")[1];
           let p = aligns.indexOf(pos) + 1;
           pos = aligns[p % aligns.length];
         }
         active.classList.remove("active");
-        const elem = document.querySelector(`.${parentClass} #align-${pos}`);
+        const elem = parent.querySelector(`#align-${pos}`);
         elem.classList.add('active');
+        
         // 配置の適用
         const main = document.getElementsByTagName("main")[0];
-        main.style.textAlign = pos;
+        const scalingbtn = document.querySelector(".header-scalingbtn");
+        aligns.forEach( p => {
+          main.classList[ p == pos ? "add" : "remove" ](p);
+        });
+        
         // cookieの書き込み
         setCookie("align", pos);
       }
+      
+
     </script>
     
     <main>
@@ -331,6 +393,8 @@
       
       // cookieから揃え位置を復元
       let pos = getCookie("align");
+      let scale = getCookie("scale");
+      fitScale(scale || "fit"); //cookieへの追加もされる
       changeAlign(pos || "left"); //cookieへの追加もされる
     </script>
     
