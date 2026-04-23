@@ -34,7 +34,7 @@
     
       <span class="header-title">/MapleStory/ キューブの確率計算器</span>
         
-      <div class="header-scalingbtn" onclick="fitScale()">
+      <div class="header-scalingbtn" onclick="changeFitScaleType()">
         <div class="icon-btn" title="画面に合わせる">
           <svg viewBox="0 0 16 16">
             <rect x="0" y="1" width="1" height="14" rx="1"/><rect x="15" y="1" width="1" height="14" rx="1"/>
@@ -67,7 +67,7 @@
           document.getElementById('menu-btn').classList.remove('active');
         }
       });
-      function fitScale(type = ""){
+      function changeFitScaleType(type = ""){
         const types = ["fit", "default"];
         const btn = document.querySelector(".header-scalingbtn");
         if ( types.indexOf(type) < 0 ){
@@ -79,10 +79,32 @@
         btn.stat = type;
         btn.classList[ type == "fit" ? "add" : "remove" ]("pressed");
         
-        // スケーリングの適用
         const main = document.getElementsByTagName("main")[0];
         const content = document.querySelector("#maindiv-wrapper");
         
+        switch (type){
+          case "fit":
+            resizeObserver.observe(main);
+            resizeObserver.observe(content);
+            break;
+          default:
+            resizeObserver.unobserve(main);
+            resizeObserver.unobserve(content);
+            break;
+        }
+        
+        fitScale();
+        
+        // cookieの書き込み
+        setCookie("scale", type);
+      }
+      
+      function fitScale(){
+        const btn = document.querySelector(".header-scalingbtn");
+        const main = document.getElementsByTagName("main")[0];
+        const content = document.querySelector("#maindiv-wrapper");
+        
+        const type = btn.stat;
         let sc = 1;
         switch (type){
           case "fit":
@@ -95,7 +117,6 @@
             resizeObserver.unobserve(content);
             break;
         }
-        console.log(sc, main.clientWidth, content.scrollWidth);
         content.style.scale = sc;
         
         if (type == "fit" && sc < 1){
@@ -103,15 +124,11 @@
         } else {
           main.classList.remove("fit");
         }
-        
-        // cookieの書き込み
-        setCookie("scale", type);
       }
       
-      // リサイズObserver
       const resizeObserver = new ResizeObserver(entries => {
         // for (let entry of entries) {}
-        fitScale("fit");
+        fitScale();
       });
       
       function changeAlign(pos = ""){
@@ -394,7 +411,7 @@
       // cookieから揃え位置を復元
       let pos = getCookie("align");
       let scale = getCookie("scale");
-      fitScale(scale || "fit"); //cookieへの追加もされる
+      changeFitScaleType(scale || "fit"); //cookieへの追加もされる
       changeAlign(pos || "left"); //cookieへの追加もされる
     </script>
     
