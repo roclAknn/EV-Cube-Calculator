@@ -1,17 +1,17 @@
 
 
 const cubetypes = [
-  ["KMS/レッドキューブ",   regularKMS, "red", 0]
-, ["KMS/ブラックキューブ", regularKMS, "black", 1]
+  ["KMS/レッドキューブ（ネオキューブ）",   regularKMS, "red", 0]
+, ["KMS/ブラックキューブ（メガキューブ）", regularKMS, "black", 1]
 , ["KMS/名匠のキューブ", regularKMS, "meister", 2]
 , ["KMS/職人のキューブ", regularKMS, "craftman", 3]
 , ["KMS/怪しいキューブ", regularKMS, "occult", 4]
 
 , ["KMS/アディショナル・ホワイトアディショナルキューブ", additionalKMS, "additional", 5]
-, ["KMS/怪しいアディショナルキューブ", additionalKMS, "rareadditional", 6]
+, ["KMS/怪しいアディショナルキューブ（レアアディショナルキューブ）", additionalKMS, "rareadditional", 6]
 
 , ["TMS/ユニキューブ", regularTMS, "uni", 7]
-, ["***/ヘキサキューブ(KMS無償テーブル)", regularKMS, "hexa", 8]
+, ["***/ヘキサキューブ（KMS無償テーブル）", regularKMS, "hexa", 8]
 ];
 
 const cubegroups = [
