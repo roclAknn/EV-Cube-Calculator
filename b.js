@@ -29,6 +29,7 @@ window.selectedequipmentlevel = -1;
 window.selectedrank = -1;
 window.selectedmaxline = -1;
 window.checkedapplyerrlist = true;
+window.exportdata = {};
 
 /* BigNumberの設定　小数桁数精度 */
 BigNumber.config({ DECIMAL_PLACES: 25 }); // 計算精度
@@ -182,7 +183,11 @@ function onchangesetting(){
   /*----------------------------------------------*/
   
   /* ユニキューブかそれ以外かでmaxlineの表示を切り替える(valueはそのまま) */
+  /* 潜在行数固定化に伴ってユニキューブ以外では非表示に */
   let cubename = tempExport.cubename;
+  document.querySelectorAll(".cell.maxline").forEach( elem =>{
+    elem.classList.toggle("hide", cubename !== "uni");
+  });
   if( cubename ){
     Array.apply(null, inputmaxline.options).forEach((k, i)=>{
       if( cubename == "uni" ){
@@ -203,7 +208,7 @@ function onchangesetting(){
     conditionupdate(); /* 出力条件の表示 */
     let flg = false;
     let data = window.selectedcube[1];
-    let exportdata = data.exportdata || {};
+    let exportdata = window.exportdata;
     // 確率テーブルに変更があれば全更新
     Object.keys(tempExport).forEach( k => {
       if ( flg ) return;
@@ -468,7 +473,7 @@ window.scoretemps = [];
 function createcubetable(exportdata){
   let data     = window.selectedcube[1];
   let {cubename, eqp, rank, lv} = exportdata;
-  data.exportdata = {...exportdata, weights:[]}; /*出力中のデータ更新*/
+  window.exportdata = {...exportdata, weights:[]}; /*出力中のデータ更新*/
   
   let ownerdiv = document.getElementById("potentialdiv");
   
@@ -513,7 +518,7 @@ function createcubetable(exportdata){
       trdatas.push({name, val, weight, depth, id});
     });
     weights[0] = sumweight;
-    data.exportdata.weights.push(weights);
+    window.exportdata.weights.push(weights);
     
     for(let trdata of trdatas){
       let {name, val, weight, depth, id} = trdata;
@@ -790,13 +795,17 @@ function checkValueType(val){
 function ondo(){
   
   const data     = window.selectedcube[1];
-  let maxline  = window.selectedmaxline;
   let applyerrlist = window.checkedapplyerrlist;
   
-  const exportdata = data.exportdata;
+  const exportdata = window.exportdata;
   let {rank, cubename, weights} = exportdata;
+  
+  /* 潜在行数は3行に固定 (ユニキューブとの整合性を維持する) */
+  let maxline  = window.selectedmaxline;
+  if (cubename !== "uni") maxline = 3;
+  
   let cuberankrate = data.ratetable[cubename][rank];
-
+  
   let fixlinenum = data.fixlinenum[cubename];
   if(fixlinenum > 0) maxline = fixlinenum;
   

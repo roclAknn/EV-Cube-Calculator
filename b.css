@@ -78,6 +78,8 @@ main.fit {
   height: 270px;
   width: 240px;
   border-right: 2px solid #333;
+  
+  --shine-duration: 0.5s;
 }
 
 #settingdiv .cell{
@@ -85,8 +87,12 @@ main.fit {
   align-items: center;
 }
 #settingdiv .cell.hide{
+  visibility: hidden;
+}
+#settingdiv .cell.none{
   display: none;
 }
+
 #settingdiv .cell.label{
   justify-content: flex-end;
   font-weight: bold;
