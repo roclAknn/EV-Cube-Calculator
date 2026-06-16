@@ -542,12 +542,22 @@ function createcubetable(exportdata){
       ratediv.innerHTML = "" + (weight * 100 / sumweight).toFixed(4) + " %";
       
       let input = document.createElement("input");
-      input.autoinput = val || 1;
-      input.type      = "text";
-      input.inputMode="decimal";
-      input.className = `input-status no-spin input-score input-score-${id}`;
-      input.oninput   = oninputscore;
-      scorediv.appendChild(input);
+      {
+        input.autoinput = val || 1;
+        input.type      = "text";
+        input.inputMode="decimal";
+        input.className = `input-status no-spin input-score input-score-${id}`;
+        input.oninput   = oninputscore;
+        const padding = 5 + 5;
+        input.onfocus = () => {
+          // Scale前の値を取得して計算
+          input.style.width = `${scorediv.offsetWidth + ratediv.offsetWidth - padding}px`;
+        }
+        input.onblur = ()=>{
+          input.style.width = ``;
+        }
+        scorediv.appendChild(input);
+      }
       
       autodiv.classList.add("potential-auto");
       let button = document.createElement("input");

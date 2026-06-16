@@ -183,7 +183,7 @@ main.fit {
 
 #potentialdiv {
   grid-auto-flow: row;
-  grid-template-columns: auto auto 1fr auto auto;
+  grid-template-columns: auto auto 1fr 52px auto;
 }
 
 #tablediv {
@@ -428,7 +428,8 @@ input.error {
 #potentialdiv .potential-score{
   padding-left: 5px;
   padding-right: 5px;
-  justify-content: center;
+  justify-content: left;
+  overflow: visible;
 }
 #potentialdiv .potential-rate{
   padding-right: 10px;
@@ -445,10 +446,11 @@ input.error {
   position: relative;
   z-index: 30000;
   height: 25px;
-  width: 40px;
+  width: 42px;
   padding: 0px 4px;
   margin: 0px;
   border: solid 1px gray;
+  transition: width 0.5s;
 }
 #potentialdiv .masked {
   background-image: linear-gradient(rgba(255,255,255,.4), rgba(255,255,255,.4)); /* 背景色に白を重ねる */
@@ -537,6 +539,7 @@ input.error {
     background-color: #88f;
     border-radius: 8px 0 0 8px;
     width: 0%;
+    transition: width .3s;
 }
 #potentialdiv .knob {
     position: absolute;
@@ -548,6 +551,7 @@ input.error {
     display: flex;
     align-items: center;
     justify-content: center;
+    transition: all .3s;
 }
 #potentialdiv .inner-circle {
     width: 13px;
