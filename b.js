@@ -840,8 +840,8 @@ function ondo(){
     if(inputscore.parentElement.style.display == "none"){
       val = 0;
     }else{
-      inputscore.classList.toggle("error", valtype < 0);
-      if( valtype < 0 ) val = 0;
+      inputscore.classList.toggle("error", val < 0);
+      if( val < 0 ) val = 0;
     }
     
     let n = ( i < weights[0].length - 1 ) ? 0 : 1;
