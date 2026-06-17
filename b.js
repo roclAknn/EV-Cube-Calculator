@@ -552,9 +552,11 @@ function createcubetable(exportdata){
         input.onfocus = () => {
           // Scale前の値を取得して計算
           input.style.width = `${scorediv.offsetWidth + ratediv.offsetWidth - padding}px`;
+          input.placeholder = "数式を入力...";
         }
         input.onblur = ()=>{
           input.style.width = ``;
+          input.placeholder = "";
         }
         scorediv.appendChild(input);
       }
