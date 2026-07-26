@@ -552,7 +552,7 @@ function createcubetable(exportdata){
         input.onfocus = () => {
           // Scale前の値を取得して計算
           input.style.width = `${scorediv.offsetWidth + ratediv.offsetWidth - padding}px`;
-          input.placeholder = "数式を入力...";
+          input.placeholder = "数値・式を入力...";
         }
         input.onblur = ()=>{
           input.style.width = ``;
@@ -563,12 +563,16 @@ function createcubetable(exportdata){
       
       autodiv.classList.add("potential-auto");
       let button = document.createElement("input");
-      button.type      = "button";
-      button.value     = ">";
+      Object.assign(button, {
+        type: "button",
+        value: ">",
+        tabIndex: -1,
+        onclick: onautoinput,
+        score: input,
+        inittext: valdiv.innerHTML + namediv.innerHTML,
+      });
       button.style.zIndex = "10000";
-      button.onclick   = onautoinput;
-      button.score     = input;
-      button.inittext  = valdiv.innerHTML + namediv.innerHTML;
+      
       autodiv.appendChild(button);
       input.autobutton   = button;
       
