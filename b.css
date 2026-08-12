@@ -298,6 +298,7 @@ select.input-status::-ms-expand {
 #tablediv .table>div.coltitle {
   background: #f66 !important;
   font-weight: bold;
+  font-size: 14px;
   color: white;
   border-bottom: 1px solid #888;
   height: 32px;
@@ -466,6 +467,7 @@ input.error {
   border-width: 0px 0px 1px 1px;
   background: #f66;
   font-weight: bold;
+  font-size: 14px;
   color: white;
 }
 #potentialdiv .potential-head:first-child {
@@ -578,6 +580,7 @@ input.error {
   background: #f9f9f9;
   color: #555;
   font-weight: bold;
+  font-size: 14px;
   border: 2px #555 solid;
   border-radius: 5px;
   height: var(--exporttype-div-height);
