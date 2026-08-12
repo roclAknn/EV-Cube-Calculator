@@ -585,6 +585,7 @@ input.error {
   border-radius: 5px;
   height: var(--exporttype-div-height);
   padding: 0px 6px;
+  user-select: none;
 }
 #exporttype3div{
   background: transparent;
