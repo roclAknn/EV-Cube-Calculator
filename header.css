@@ -5,6 +5,9 @@
   --header-border-radius: 8px;
   --header-border-color: #1d1d1d;
 }
+body {
+  padding-top: 50px;
+}
 header{
   color: #141414;
   display: flex;
@@ -15,8 +18,11 @@ header{
   border-bottom: 0.5px solid #1d1d1d;
   background: var(--header-background-color);
   gap: 12px;
-  position: relative;
+  position: fixed;
   margin-bottom: 10px;
+  top: 0;
+  left: 0;
+  right: 0;
 }
 .header-dropdown-wrapper{
   display: flex;
