@@ -67,6 +67,13 @@
           document.getElementById('menu-btn').classList.remove('active');
         }
       });
+      {
+        // 縦方向を固定しない
+        const header = document.querySelector("header");
+        document.addEventListener('scroll', () => {
+          header.style.top = `${- window.scrollY}px`;
+        });
+      }
       function changeFitScaleType(type = ""){
         const types = ["fit", "default"];
         const btn = document.querySelector(".header-scalingbtn");
