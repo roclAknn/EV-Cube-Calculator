@@ -171,11 +171,8 @@ main.fit {
 
 #exportdiv {
   grid-auto-flow: row;
-  grid-template-columns: auto 1fr;
+  grid-template-columns: repeat(2, minmax(300px, 1fr));
   margin-bottom: -1px;
-}
-#exportdiv .wrapdiv:first-child{
-  min-width: 313px;
 }
 
 #potentialdiv {
