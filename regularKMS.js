@@ -26,7 +26,8 @@ regularKMS.init = function(){
     * 汎用処理で[同等級率, 下位等級率]に書き換える
     */
     data.fixlinenum = {
-        "hexa": 6
+        "hexa": 6,
+        "prime": 2,
     };
     data.ratetable = {
         "red":
@@ -53,6 +54,10 @@ regularKMS.init = function(){
       ]
       , "hexa" :
           new Array(4).fill( [1, 0.1, 0.01, 0.01, 0.1, 0.01] )
+      , "prime" : [
+        [0.2, 0.05, null]
+        , null, null, null
+      ]
     };
     
     data.upgradetable = {
@@ -61,7 +66,8 @@ regularKMS.init = function(){
       , "occult"   : [ 0, 0,        0,        0.009901 ]
       , "craftman" : [ 0, 0,        0.011858, 0.047619 ]
       , "meister"  : [ 0, 0.001996, 0.016959, 0.079994 ]
-      , "hexa"     : [ "N/a", "N/a", "N/a", "N/a"]
+      , "hexa"     : [ "・6つのオプションから任意の3オプションを適用できるキューブ", "--", "--", "--"]
+      , "prime"     : [ "・1行目オプションが固定され、下2行だけを変更できるキューブ", "--", "--", "--"]
     };
     data.images = {
         "red"      : "redcube.png"
@@ -70,12 +76,34 @@ regularKMS.init = function(){
       , "craftman" : "craftmancube.png"
       , "meister"  : "meistercube.png"
       , "hexa"     : "hexacube.png"
+      , "prime"     : "primecube.png"
     };
     
     
     data.weights = {};
+
     data.weights["red"]
-    = data.weights["black"] = [];
+    = data.weights["black"]
+    = data.weights["prime"] = [];
+
+    data.weights["occult"]
+    = data.weights["craftman"]
+    = data.weights["meister"]
+    = data.weights["hexa"] = [];
+
+    data.equipmentpotential = {};
+    
+    data.equipmentpotential["red"]
+    = data.equipmentpotential["black"]
+    = data.equipmentpotential["prime"]
+    = [];
+    
+    data.equipmentpotential["occult"]
+    = data.equipmentpotential["craftman"]
+    = data.equipmentpotential["meister"]
+    = data.equipmentpotential["hexa"]
+    = [];
+    
     with(commons.consts){
       let ws = data.weights["red"];
       
@@ -153,10 +181,6 @@ regularKMS.init = function(){
       ws[spmd]  = [0,4,0,0,0];
     }
     
-    data.weights["occult"]
-    = data.weights["craftman"]
-    = data.weights["meister"]
-    = data.weights["hexa"] = [];
     with(commons.consts){
       let ws = data.weights["occult"];
       ws[pstr1]  = [4,2,2,2,0]; ws[pdex1] = ws[pint1] = ws[pluk1] = ws[pstr1];
@@ -249,14 +273,10 @@ regularKMS.init = function(){
       ,     oemos    = [oemo1, oemo2, oemo3, oemo4, oemo5]
       ;
       
-      data.equipmentpotential = {};
       let list;
       
       /*----------------- 有償キューブ装備別潜在 ------------------------------------------------------------*/
-      list = [];
-      data.equipmentpotential["red"]
-      = data.equipmentpotential["black"]
-      = list;
+      list = data.equipmentpotential["red"];
       list[武器] = [];
       list[武器][レジェ]       = [].concat(pstatus1, [pall1, patk, pma, iatk2, ima2, pcri, pdam, pboss1, pboss2, pign1, pign2]);
       list[武器][ユニ]         = [].concat(pstatus1, [pall1, patk, pma, pcri, pdam, pboss1, pign1]);
@@ -357,12 +377,7 @@ regularKMS.init = function(){
       let temp = data.equipmentpotential.red;
       temp = JSON.parse(JSON.stringify(temp));
       
-      list = [];
-        data.equipmentpotential["occult"]
-      = data.equipmentpotential["craftman"]
-      = data.equipmentpotential["meister"]
-      = data.equipmentpotential["hexa"]
-      = list;
+      list = data.equipmentpotential["occult"];
       
       list[武器] = [];
       list[武器][レジェ] = temp[武器][レジェ].del([iatk2, ima2]);

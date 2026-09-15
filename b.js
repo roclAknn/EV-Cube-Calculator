@@ -3,7 +3,7 @@
 const cubetypes = [
   ["KMS/レッドキューブ（ネオキューブ）",   regularKMS, "red", 0]
 , ["KMS/ブラックキューブ（メガキューブ）", regularKMS, "black", 1]
-, ["KMS/名匠のキューブ", regularKMS, "meister", 2]
+, ["KMS/名匠のキューブ・イベントリング専用キューブ", regularKMS, "meister", 2]
 , ["KMS/職人のキューブ", regularKMS, "craftman", 3]
 , ["KMS/怪しいキューブ", regularKMS, "occult", 4]
 
@@ -11,7 +11,10 @@ const cubetypes = [
 , ["KMS/怪しいアディショナルキューブ（レアアディショナルキューブ）", additionalKMS, "rareadditional", 6]
 
 , ["TMS/ユニキューブ", regularTMS, "uni", 7]
-, ["***/ヘキサキューブ（KMS無償テーブル）", regularKMS, "hexa", 8]
+, ["***/ヘキサキューブ（無償テーブル）", regularKMS, "hexa", 8]
+
+, ["KMS/プライムキューブ", regularKMS, "prime", 9]
+, ["KMS/プライムアディショナルキューブ", additionalKMS, "primeadditional", 10]
 ];
 
 const cubegroups = [
@@ -19,6 +22,7 @@ const cubegroups = [
 , ["KMS/上潜在/無償テーブル", [2, 3, 4]]
 , ["KMS/下潜在/共通テーブル", [5, 6]]
 , ["その他", [7, 8]]
+, ["JMS未実装", [9, 10]]
 ];
 
 const tempeqplv = [250, 200, 160, 150, 140, 130, 120, 110, 100, 0];
@@ -264,18 +268,29 @@ function setcubeinfodiv(){
     }
     ratetable = newtable;
   }
-  
+
+  /* プライムキューブは2行キューブとして扱っているので、1行目用のテキストを挿入する */
+  if ( cubename == "prime" || cubename == "primeadditional"){
+    let newtable = [
+      [["固定"], ...ratetable[0].slice(0, 2)]
+      , null, null, null
+    ];
+    ratetable = newtable;
+  }
+  console.log(upgtable);
   for(let i = 0; i < ratetable.length; i++){
     let cn = commons.rankclassnames[i];
     let divs = document.querySelectorAll("#cubeinfodiv .data." + cn);
     for(let ii = 0; ii <= 3; ii++){
+      let isnone = false;
+      let isupgradetext = false;
       let rate;
       if( ii < 3 ){
         rate = !ratetable[i] ? 0 : ratetable[i][ii][0];
       }else{
         rate = upgtable[i];
+        if (isNaN(rate)) isupgradetext = true;
       }
-      let isnone = false;
       if( typeof(rate) == "number" ){
         if( rate > 0 ){
           rate = +(new BigNumber(100).times( rate ));
@@ -286,12 +301,15 @@ function setcubeinfodiv(){
       }else{
         isnone = true;
       }
-      if ( isnone ){
-        divs[ii].innerHTML = rate;
-        divs[ii].classList.add("none");
-      }else{
-        divs[ii].innerHTML = "" + rate + "%";
-        divs[ii].classList.remove("none");
+      const div = divs[ii];
+      div.innerText = `${rate}${ isnone ? "" : "%" }`;
+      div.classList.toggle("none", isnone);
+      // 昇級確率欄をTipsとして使う
+      // レジェ行のセルを拡張して他を隠す
+      if (i === 0){
+        div.classList.toggle("tips", isupgradetext);
+      } else {
+        div.classList.toggle("hide", isupgradetext);
       }
     }
   }
@@ -344,9 +362,8 @@ createTable.switch = function(){
   const selrank = this.result.rank;
   let upgradeprob;
   if ( cubedata && cubename ){
-    upgradeprob = cubedata?.at(1).upgradetable[cubename]?.at(selrank);
-    if (upgradeprob === undefined) upgradeprob = -1;
-    if (cubename == "uni" || cubename == "hexa") upgradeprob = -1;
+    upgradeprob = cubedata?.at(1).upgradetable[cubename]?.at(selrank) ?? -1;
+    if (isNaN(upgradeprob)) upgradeprob = -1;
     keys.push(...upgradekey);
     list[upgradekey[0]] = new BigNumber( upgradeprob );
     list[upgradekey[1]] = list[upgradekey[0]].times(2);

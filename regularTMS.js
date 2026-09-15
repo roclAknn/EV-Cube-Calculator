@@ -34,7 +34,7 @@ regularTMS.init = function(){
     };
     
     data.upgradetable = {
-        "uni"     : [ "レア等級の仕様不明", "N/a", "行数で行選択率指定", "N/a"]
+        "uni"     : [ "・ランダムな1行だけを変更できるキューブ\n・変更候補の行数を指定してください", "--", "--", "--", "--"]
     };
     data.images = {
         "uni"      : "unicube.png"

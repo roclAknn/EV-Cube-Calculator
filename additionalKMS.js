@@ -24,6 +24,7 @@ additionalKMS.init = function(){
     * 汎用処理で[同等級率, 下位等級率]に書き換える
     */
     data.fixlinenum = {
+      "primeadditional": 2,
     };
     data.ratetable = {
       "additional" : [
@@ -44,22 +45,36 @@ additionalKMS.init = function(){
         , [1, 0.004000, 0.004000]
         , [1, 0.019608, 0.019608]
       ]
+      , "primeadditional" : [
+        [0.004975, 0.004975, null]
+        , null, null, null
+      ]
     };
     data.upgradetable = {
         "additional"      : [0, 0.007, 0.019608, 0.047619]
       , "whiteadditional" : [0, 0.007, 0.019608, 0.047619]
       , "rareadditional"  : [0, 0, 0, 0.004]
+      , "primeadditional" : [ "・1行目オプションが固定され、下2行だけを変更できるキューブ", "--", "--", "--"]
     };
     data.images = {
         "additional"      : "additional.png"
       , "whiteadditional" : "whiteadditional.png"
       , "rareadditional"  : "rareadditional.png"
+      , "primeadditional" : "primeadditional.png"
     };
 
     data.weights = {};
     data.weights["additional"]
     = data.weights["whiteadditional"]
-    = data.weights["rareadditional"] = [];
+    = data.weights["rareadditional"]
+    = data.weights["primeadditional"] = [];
+
+    data.equipmentpotential = {};
+    data.equipmentpotential["additional"]
+    = data.equipmentpotential["whiteadditional"]
+    = data.equipmentpotential["rareadditional"]
+    = data.equipmentpotential["primeadditional"] = [];
+
     with(commons.consts){
       let ws = data.weights["additional"];
       
@@ -154,15 +169,10 @@ additionalKMS.init = function(){
       ,     oemos  = [oemo1, oemo2, oemo3, oemo4, oemo5]
       ;
       
-      data.equipmentpotential = {};
       let list;
       
       /*----------------- 共通キューブ装備別潜在 ------------------------------------------------------------*/
-      list = [];
-      data.equipmentpotential["additional"]
-      = data.equipmentpotential["whiteadditional"]
-      = data.equipmentpotential["rareadditional"]
-      = list;
+      list = data.equipmentpotential["additional"];
       list[武器] = [];
       list[武器][レジェ]       = [].concat(pstatus2, pall2, patk, pma, lvstatus, iatk2, ima2, php, pmp, pcri, pdam, pboss1, pign1);
       list[武器][ユニ]         = [].concat(pstatus2, pall2, patk, pma, lvstatus, php, pmp, pcri, pdam, pboss1, pign1, ohp1, omp1);
