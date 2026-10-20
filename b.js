@@ -49,6 +49,13 @@ Decimal.zero = Decimal(0);
 
 /*===== ページロード後初期化処理 ===============================================*/
 function initialize(){
+  buildHeader(
+    "/MapleStory/ キューブの確率計算器",
+    [
+      ["GitHub(使い方)", "https://github.com/roclAknn/EV-Cube-Calculator/"]
+    ]
+  );
+  
   initcubedatas();
   UIinitialize();
 }
