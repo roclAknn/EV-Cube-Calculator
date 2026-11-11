@@ -618,7 +618,7 @@ function createcubetable(exportdata){
   }
 }
 
-oninputscore.delay = 1000;
+oninputscore.delay = 500;
 function oninputscore(){
   if( this.validity.badInput || this.value.length > 0 ){
     this.autobutton.classList.add("delete");
