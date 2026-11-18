@@ -983,10 +983,12 @@ createTable.switch = function () {
         val = val.toDecimalPlaces(window.exportRoundDegit);
       }
 
-      let [intPart, decPart] = val.toFixed().split(".");
-      if (type1primary === "num" && !decPart) {
-        decPart = "00"
+      let valstr = val.toFixed();
+      if (type1primary === "num") {
+        valstr = val.toFixed(2);
       }
+
+      let [intPart, decPart] = valstr.split(".");
       if (isUpg && val.lte(0)) {
         intPart = "--";
         decPart = "";
