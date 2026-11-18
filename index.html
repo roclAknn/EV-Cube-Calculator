@@ -1,279 +1,228 @@
 <!DOCTYPE html>
-<html>
-  <head>
-    <title>キューブの確率計算器 | めいぽ電卓</title>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=0,viewport-fit=cover" />
-    <meta name="google-site-verification" content="vkAHjrHWlxI9ch267E96FHR8p9ajVqys8hCnFSBES8A" />
-    <meta name="description" content="メイプルストーリー計算ツール　潜在能力を重複させるのにキューブがいくつ必要か表示します" />
-    <link rel="stylesheet" href="/header.css">
-    <script src="/header.js"></script>
-    <link rel="stylesheet" href="b.css">
-    <link rel="icon" href="images/favicon.ico" type="image/x-icon">
-    <script data-goatcounter="https://roclaknn.goatcounter.com/count" async src="goatcounter.js"></script>
-    <script src='https://cdn.jsdelivr.net/npm/bignumber.js@9.1.2/bignumber.min.js'></script>
-    <script src='https://cdn.jsdelivr.net/npm/decimal.js@10.6.0/decimal.min.js'></script>
-    <script src="regularKMS.js"></script>
-    <script src="additionalKMS.js"></script>
-    <script src="regularTMS.js"></script>
-    <script src="common.js"></script>
-    <script src="b.js"></script>
-  </head>
-  <body onload="initialize()">
-    <main>
+<html lang="ja">
+
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport"
+    content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=0, viewport-fit=cover" />
+  <title>キューブの確率計算器 | めいぽ電卓</title>
+  <meta name="description" content="メイプルストーリー計算ツール 潜在能力を重複させるのにキューブがいくつ必要か表示します" />
+  <link rel="icon" href="./images/favicon.ico" type="image/x-icon">
+
+  <link rel="stylesheet" href="/header.css">
+  <script src="/header.js"></script>
+
+  <script async src="/lib/goatcounter.js" data-goatcounter="https://roclaknn.goatcounter.com/count"></script>
+  <script src="/lib/decimal.min.js"></script>
+
+  <link rel="stylesheet" href="cube-calc.css">
+  <script src="regularKMS.js"></script>
+  <script src="additionalKMS.js"></script>
+  <script src="regularTMS.js"></script>
+  <script src="common.js"></script>
+  <script src="cube-calc.js"></script>
+</head>
+
+<body onload="initialize()">
+  <main>
     <div id="maindiv-wrapper">
-    <div id="maindiv" class="grid" style="">
-      <div id="headerdiv" class="grid" style="">
-        <div id="settingdiv" class="grid" style="">
-          <div class="cell label top"></div>
-          <div class="cell label"><label for="input-cubetype">キューブ:</label></div>
-          <div class="cell label"><label for="input-equipmenttype">装備種別:</label></div>
-          <div class="cell label"><label for="input-equipmentlevel">装備レベル:</label></div>
-          <div class="cell label"><label for="input-potentialrank">潜在等級:</label></div>
-          <div class="cell label hide maxline"><label for="input-maxline">潜在行数:</label></div>
-          <div class="cell label none"><label for="input-applyerrlist">重複制限:</label></div>
-          <div class="cell label opt bottom"></div>
-          
-          <div class="cell input top"></div>
-          <div class="cell input"><select id="input-cubetype" class="input-status"              onchange="onchangecube();" required disabled>
-            <option value="" hidden>未選択</option>
-          </select></div>
-          <div class="cell input"><select id="input-equipmenttype" class="input-status"         onchange="onchangesetting();" required disabled>
-            <option value="" hidden>未選択</option>
-          </select></div>
-          <div class="cell input"><input id="input-equipmentlevel" class="input-status no-spin" oninput="onchangesetting();" value="200" type="number" disabled></div>
-          <div class="cell input"><select id="input-potentialrank" class="input-status"         onchange="onchangesetting();" required disabled>
-            <option value="" hidden>未選択</option>
-          </select></div>
-          <div class="cell input hide maxline"><select id="input-maxline" class="input-status"               onchange="onchangesetting();" disabled>
-            <option value="3" selected>3行</option><option value="2">2行</option><option value="1">1行</option>
-          </select></div>
-          <div class="cell input none"><input id="input-applyerrlist" class="input-status"           onchange="onchangesetting();" type="checkbox" checked disabled></div>
-          
-          <div class="cell input opt bottom"></div>
-        </div>
-        <div id="cubeinfodiv" class="grid" style="">
-          <div class="cell left head top"></div>
-          <div class="cell left head" id="cubeimagediv">
-            <img class="cubeimage" src="./images/cubes.png">
-          </div>
-          <div class="cell left head">1行目<br>上級</div>
-          <div class="cell left head">2行目<br>上級</div>
-          <div class="cell left head">3行目<br>上級</div>
-          <div class="cell left head">等級<br>上昇</div>
-          <div class="cell left head bottom"></div>
-          
-          <div class="cell legendary top"></div>
-          <div class="cell legendary">レジェンダリー</div>
-          <div class="cell legendary data none"></div>
-          <div class="cell legendary data none"></div>
-          <div class="cell legendary data none"></div>
-          <div class="cell legendary data none"></div>
-          <div class="cell legendary bottom"></div>
-        
-          <div class="cell unique top"></div>
-          <div class="cell unique">ユニーク</div>
-          <div class="cell unique data none"></div>
-          <div class="cell unique data none"></div>
-          <div class="cell unique data none"></div>
-          <div class="cell unique data none"></div>
-          <div class="cell unique bottom"></div>
-          
-          <div class="cell epic top"></div>
-          <div class="cell epic">エピック</div>
-          <div class="cell epic data none"></div>
-          <div class="cell epic data none"></div>
-          <div class="cell epic data none"></div>
-          <div class="cell epic data none"></div>
-          <div class="cell epic bottom"></div>
-        
-          <div class="cell rare top"></div>
-          <div class="cell rare">レア</div>
-          <div class="cell rare data none"></div>
-          <div class="cell rare data none"></div>
-          <div class="cell rare data none"></div>
-          <div class="cell rare data none"></div>
-          <div class="cell rare bottom"></div>
-        </div>
-      </div>
-      <div id="openerdiv">
-        <div class="wrapdiv" style="position: relative;">
-          <div class="arrowdiv"></div>
-        </div>
-        <div id="conditiondiv" class="grid">
-          <div id="condition-cube">
-            <img class="cubeimage" src="./images/cubes.png">
-          </div>
-          <div id="condition-eqp">
-            <img class="eqpimage" src="./images/equipments.png">
-          </div>
-          <div id="condition-expantion-container">
-            <div id="condition-level"></div>
-            <div id="condition-rank"></div>
-          </div>
-          
-          <input id="exporttype1input" class="no-spin" oninput="createTable.switch();" value="1" type="text" inputmode="decimal" disabled>
-          <div id="exporttype1div"></div>
-          <select id="exporttype1" hidden></select>
-          <div id="exporttype2div"></div>
-          <select id="exporttype2" hidden></select>
-          <div id="exporttype3div">
-            <input id="exporttype3" class="no-spin" oninput="createTable.switch();" value="" type="text" inputmode="decimal" placeholder="値段">
-          </div>
-        </div>
-      </div>
-      <script>
-        {
-          /* exporttype1,2の処理 */
-          const exporttype1input = document.getElementById("exporttype1input");
-          const exporttype1div = document.getElementById("exporttype1div");
-          const exporttype1 = document.getElementById("exporttype1");
-          const exporttype1names  = ["平均消費数[個]", "50%ライン[個]", "95%ライン[個]", "個で出る確率[x1]", "個で出る確率[x100]", "個で出る確率[x10000]"];
-          const exporttype1values = ["numavg", "num50", "num95", "prob1", "prob100", "prob10000"];
-          const exporttype2div = document.getElementById("exporttype2div");
-          const exporttype2 = document.getElementById("exporttype2");
-          const exporttype2names  = ["スコア以上", "スコア一致"];
-          const exporttype2values = [">=", "=="];
-          
-          let inner = `<optgroup>`;
-          exporttype1names.forEach((name, idx)=>{
-            let value = exporttype1values[idx];
-            inner += `<option value="${value}" label="${name}" ${idx==0 ? "selected" : ""}></option>`;
-          });
-          inner += `</optgroup>`;
-          exporttype1.innerHTML = inner;
-          
-          inner = `<optgroup>`;
-          exporttype2names.forEach((name, idx)=>{
-            let value = exporttype2values[idx];
-            inner += `<option value="${value}" label="${name}" ${idx==0 ? "selected" : ""}></option>`;
-          });
-          inner += `</optgroup>`;
-          exporttype2.innerHTML = inner;
-          
-          // 読み込み時に同期
-          let idx = exporttype1.selectedIndex;
-          exporttype1div.innerHTML = exporttype1.selectedOptions[0].label;
-          idx = exporttype2.selectedIndex;
-          exporttype2div.innerHTML = exporttype2.selectedOptions[0].label;
-          exporttype1div.onclick = function(){
-            let idx = exporttype1.selectedIndex = (exporttype1.selectedIndex + 1) % exporttype1.length;
-            exporttype1div.innerHTML = exporttype1.selectedOptions[0].label;
-            exporttype1input.disabled = !/^prob/.test( exporttype1values[idx] );
-            // テーブル切り替え処理
-            createTable.switch();
-          }
-          exporttype2div.onclick = function(){
-            exporttype2.selectedIndex = (exporttype2.selectedIndex + 1) % exporttype2.length;
-            exporttype2div.innerHTML = exporttype2.selectedOptions[0].label;
-            // テーブル切り替え処理
-            createTable.switch();
-          }
-        }
-      </script>
-      <div id="exportdiv" class="grid" style="">
-        <div class="wrapdiv">
-          <div id="potentialdiv" class="grid" style="">
-            <div class="cell potential-head" style="grid-column: 1 / span 3; display: flex;">
-              <span title="有効オプションに絞って表示">
-                <input type="range" id="input-potential-displayamount" step="1" min="0" max="2" style="min-width:50px; max-width:100px; display: none;" onchange="onchangedisplayamount();">
-                <div class="slider-container" id="slider-container">
-                  <div class="slider-fill" id="slider-fill"></div>
-                  <div class="knob" id="knob">
-                    <div class="inner-circle"></div>
-                  </div>
-                </div>
-              </span>
-              <span style="margin: auto;">潜在能力</span>
+      <div class="calculator-main">
+        <!-- ==================== 上部設定パネル（メイン設定 ＆ キューブ情報表） ==================== -->
+        <div id="header-config-panel" class="config-panel">
+          <!-- 左側：メイン設定フォーム -->
+          <div class="settings-form">
+            <!-- キューブ情報表ヘッダー -->
+            <div class="setting-form-header  summary-wrap">
+              <span class="setting-form-title">メイン設定</span>
             </div>
-            <div class="cell potential-head">Score</div>
-            <div class="cell potential-head">確率</div>
+            <!-- キューブ選択（独自SELECT） -->
+            <div class="form-row">
+              <label class="form-label">キューブ:</label>
+              <div class="form-input-wrap">
+                <div class="custom-select-container" id="cube-custom-select">
+                  <div class="custom-select-trigger" id="cube-select-trigger" tabindex="0">
+                    <span class="cube-icon-wrapper"><span class="cube-icon-thumb cube-selected-icon"></span></span>
+                    <span class="custom-selected-name cube-selected-name">未選択</span>
+                    <span class="cs-arrow">▼</span>
+                  </div>
+                  <div class="custom-select-dropdown" id="cube-select-dropdown"></div>
+                </div>
+              </div>
+            </div>
+
+            <!-- 装備種別（独自SELECT: 画像＋テキスト） -->
+            <div class="form-row">
+              <label class="form-label">装備種別:</label>
+              <div class="form-input-wrap">
+                <div class="custom-select-container" id="eqp-custom-select">
+                  <div class="custom-select-trigger" id="eqp-select-trigger" tabindex="0">
+                    <span class="eqp-icon-wrapper"><span class="eqp-icon-thumb eqp-selected-icon"></span></span>
+                    <span class="custom-selected-name eqp-selected-name">武器</span>
+                    <span class="cs-arrow">▼</span>
+                  </div>
+                  <div class="custom-select-dropdown" id="eqp-select-dropdown"></div>
+                </div>
+              </div>
+            </div>
+
+            <!-- 装備レベル -->
+            <div class="form-row">
+              <label for="input-equipmentlevel" class="form-label">装備Lv:</label>
+              <div class="form-input-wrap">
+                <input id="input-equipmentlevel" class="std-input no-spin" oninput="onchangesetting();" value="200"
+                  type="number">
+              </div>
+            </div>
+
+            <!-- 潜在等級 -->
+            <div class="form-row">
+              <label for="input-potentialrank" class="form-label">潜在等級:</label>
+              <div class="form-input-wrap">
+                <select id="input-potentialrank" class="std-select" onchange="onchangesetting();" required>
+                  <option value="" hidden>未選択</option>
+                </select>
+              </div>
+            </div>
+
+            <!-- ユニキューブ専用：変更候補行数 -->
+            <div class="form-row" id="form-row-maxline" style="display: none;">
+              <label for="input-maxline" class="form-label">変更候補:</label>
+              <div class="form-input-wrap">
+                <select id="input-maxline" class="std-select">
+                  <option value="3" selected>1行狙い</option>
+                  <option value="2">2行狙い</option>
+                  <option value="1">3行狙い</option>
+                </select>
+              </div>
+            </div>
+          </div>
+
+          <!-- 右側：キューブ情報表（縦横入れ替え表 または ヘキサ専用表） -->
+          <div id="cube-info-panel" class="cube-info-panel">
+            <!-- JSで動的生成 -->
           </div>
         </div>
-        <div class="wrapdiv">
-          <div id="tablediv"></div>
+
+        <!-- ==================== コンディションバー（2行レイアウト） ==================== -->
+        <div class="condition-bar">
+          <!-- 上段：左端に開閉アイコンボタン、右に選択中アイテムアイコンのみ表示 -->
+          <div class="condition-top-line">
+            <button type="button" class="panel-toggle-btn" id="panel-toggle-btn" title="メイン設定パネルの開閉">
+              <span class="arrow-icon">▲</span>
+            </button>
+            <div class="condition-summary-group">
+              <div class="condition-item" title="選択中キューブ">
+                <span class="cube-icon-wrapper"><span class="cube-icon-thumb" id="condition-cube-icon"></span></span>
+              </div>
+              <div class="condition-item" title="選択中装備">
+                <span class="eqp-icon-wrapper"><span class="eqp-icon-thumb" id="condition-eqp-icon"></span></span>
+              </div>
+              <div class="condition-item">
+                <span id="condition-level">Lv.200</span>
+              </div>
+              <div class="condition-item">
+                <span id="condition-rank" class="rank-pill legendary">レジェンダリー</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- 下段：出力切り替え ＆ 有効オプション絞り込み -->
+          <div class="condition-bottom-line">
+            <!-- 左：有効オプションスライダー（ドラッグ対応） -->
+            <div class="condition-filters-left">
+              <div class="filter-slider-wrap" title="有効オプションに絞って表示（ドラッグ可能）">
+                <span>潜在絞り込み:</span>
+                <div class="filter-slider" id="filter-slider">
+                  <div class="filter-slider-fill" id="filter-slider-fill"></div>
+                  <div class="filter-slider-knob" id="filter-slider-knob"></div>
+                </div>
+                <span id="filter-slider-label">有効のみ</span>
+              </div>
+            </div>
+
+            <!-- 右：出力切り替え（#displayToggleBtn準拠）、条件切り替え、値段入力 -->
+            <div class="condition-controls-right">
+              <!-- 出力種別切り替えボタン ＆ パラメータ入力（個数 または n%ライン） -->
+              <div class="toggle-wrap">
+                <!-- probモード用の個数入力 -->
+                <div class="param-input-wrap hidden" id="paramNWrap">
+                  <input type="number" id="paramNInput" class="param-input no-spin" value="1" min="1" step="1">
+                  <span class="param-unit">個</span>
+                </div>
+                <!-- numpモード用の確率%入力 -->
+                <div class="param-input-wrap hidden" id="paramPWrap">
+                  <input type="number" id="paramPInput" class="param-input no-spin" value="95" min="1" max="99"
+                    step="1">
+                  <span class="param-unit">%</span>
+                </div>
+                <button type="button" class="display-toggle-btn" id="displayToggleBtn" title="クリックで切り替え">
+                  <span id="displayToggleLabel">平均消費数[個]</span>
+                  <span class="toggle-arrow">⇄</span>
+                </button>
+              </div>
+
+              <!-- 条件切り替え（>= または ==） -->
+              <button type="button" class="condition-toggle-btn" id="conditionToggleBtn" title="スコア判定条件の切り替え">
+                スコア以上 (&gt;=)
+              </button>
+
+              <!-- 値段入力 -->
+              <div class="price-input-wrap" title="1個あたりの単価">
+                <span class="price-prefix">×</span>
+                <input type="text" inputmode="decimal" id="exportPriceInput" class="price-input no-spin"
+                  placeholder="値段など">
+              </div>
+            </div>
+          </div>
         </div>
+
+        <!-- ==================== 下部：潜在能力テーブル ＆ 出力結果表（常に横並び） ==================== -->
+        <div class="content-grid">
+          <!-- 左ペイン：潜在能力一覧・スコア入力 -->
+          <div class="potential-pane">
+            <div class="pane-header-row">
+              <div class="pane-th">潜在能力</div>
+              <div class="pane-th">
+                <button type="button" class="pane-th-score-btn" onclick="openScoreModal();" title="スコア自動入力設定を開く">
+                  Score ⚙
+                </button>
+              </div>
+              <div class="pane-th">確率</div>
+            </div>
+            <div class="potential-list-scroll" id="potential-list-body">
+              <!-- JSで動的生成 -->
+            </div>
+          </div>
+
+          <!-- 右ペイン：計算結果表 -->
+          <div class="result-pane">
+            <div class="calc-result-scroll" id="calc-result-panel">
+              <!-- JSで動的生成 -->
+            </div>
+          </div>
+        </div>
+
+      </div><!-- /.calculator-main -->
+    </div><!-- /#maindiv-wrapper -->
+  </main>
+
+  <!-- ==================== スコア自動入力モーダル ==================== -->
+  <div class="modal-overlay" id="score-modal-overlay">
+    <div class="modal-dialog">
+      <div class="modal-header">
+        <h3 class="modal-title">スコア自動入力 設定</h3>
+        <button type="button" class="modal-close-btn" id="score-modal-close" title="閉じる">✕</button>
+      </div>
+      <div class="modal-body" id="score-modal-body">
+        <!-- JSで動的生成 -->
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn-secondary" id="score-modal-cancel">キャンセル</button>
+        <button type="button" class="btn-primary" id="score-modal-apply">適用する</button>
       </div>
     </div>
-    </div>
-    </main>
-    <script>
-      {
-        // 潜在能力表示量の調整つまみの動作処理
-        const input = document.getElementById("input-potential-displayamount");
-        const container = input.parentElement;
-        const knob   = container.getElementsByClassName("knob")[0];
-        const fill   = container.getElementsByClassName("slider-fill")[0];
-        const slider = container.getElementsByClassName("slider-container")[0];
-        const margin = 5;
-        const positions = [0+margin, 50, 100-margin];
-        let positionIndex = 1;
-        let isDragging = false;
-        updateKnobPosition();
-        
-        slider.addEventListener("click", moveKnob);
-        slider.addEventListener("mousedown", startDrag);
-        slider.addEventListener("touchstart", startDrag);
-        
-        function startDrag(event) {
-            endDrag(); // 重複登録を防ぐ
-            isDragging = true;
-            document.addEventListener("mousemove", dragKnob);
-            document.addEventListener("mouseup", endDrag);
-            document.addEventListener("touchmove", dragKnob);
-            document.addEventListener("touchend", endDrag);
-            document.addEventListener("dragend", endDrag); // mouseupが発生しない場合の終了処理
-        }
-        function endDrag(event) {
-            isDragging = false;
-            document.removeEventListener("mousemove", dragKnob);
-            document.removeEventListener("mouseup", endDrag);
-            document.removeEventListener("touchmove", dragKnob);
-            document.removeEventListener("touchend", endDrag);
-            document.removeEventListener("dragend", endDrag);
-        }
-        function dragKnob(event) {
-            if (!isDragging ) return;
-            moveKnob(event);
-        }
-        function moveKnob(event) {
-            const clientX = event.touches ? event.touches[0].clientX : event.clientX;
-            if ( clientX == 0 ) return;
-            const rect = slider.getBoundingClientRect();
-            let offsetX = clientX - rect.left;
-            let stepWidth = rect.width / 3;
-            // console.log([rect.width, clientX - rect.left], [stepWidth, offsetX]);
-            positionIndex = Math.min(2, Math.max(0, Math.floor(offsetX / stepWidth)));
-            updateKnobPosition();
-        }
-        
-        function updateKnobPosition() {
-            knob.style.left = positions[positionIndex] + "%";
-            knob.style.transform = "translateX(-50%)";
-            fill.style.width = positions[positionIndex] + "%";
-            input.value = positionIndex;
-            input.onchange();
-        }
-      }
-    </script>
-    <script>
-      /* cookie */
-      function setCookie(name, value, days = 365) {
-        const expires = new Date(Date.now() + days * 864e5).toUTCString();
-        document.cookie = `${name}=${encodeURIComponent(value)}; expires=${expires}; path=/`;
-      }
-      
-      function getCookie(name) {
-        return document.cookie.split("; ").reduce((r, v) => {
-          const [key, val] = v.split("=");
-          return key === name ? decodeURIComponent(val) : r;
-        }, null);
-      }
-    </script>
-    
-    
-    
-    
-    
-  </body>
+  </div>
+
+</body>
+
 </html>

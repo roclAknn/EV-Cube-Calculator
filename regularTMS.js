@@ -34,7 +34,10 @@ regularTMS.init = function(){
     };
     
     data.upgradetable = {
-        "uni"     : [ "・ランダムな1行だけを変更できるキューブ\n・変更候補の行数を指定してください", "--", "--", "--", "--"]
+        "uni"     : [ null, null, null, null, null ]
+    };
+    data.remarks = {
+        "uni" : "ランダムな1行だけを変更できるキューブ。変更候補の行数を指定してください"
     };
     data.images = {
         "uni"      : "unicube.png"
@@ -317,7 +320,7 @@ regularTMS.init = function(){
     for( let k of Object.keys(data.ratetable) ){
       data.ratetable[k].map( (e, i, arr) =>{
         if(!e) return;
-        arr[i] = e.map( r => [ r, new BigNumber(1).minus( r ) ] );
+        arr[i] = e.map( r => (r === null || r === undefined) ? null : [ r, new Decimal(1).minus( r ) ] );
       });
     }
     

@@ -54,7 +54,10 @@ additionalKMS.init = function(){
         "additional"      : [0, 0.007, 0.019608, 0.047619]
       , "whiteadditional" : [0, 0.007, 0.019608, 0.047619]
       , "rareadditional"  : [0, 0, 0, 0.004]
-      , "primeadditional" : [ "・1行目オプションが固定され、下2行だけを変更できるキューブ", "--", "--", "--"]
+      , "primeadditional" : [ null, null, null, null ]
+    };
+    data.remarks = {
+        "primeadditional" : "1行目オプションが固定され、下2行だけを変更できるキューブ"
     };
     data.images = {
         "additional"      : "additional.png"
@@ -935,7 +938,7 @@ additionalKMS.init = function(){
     for( let k of Object.keys(data.ratetable) ){
       data.ratetable[k].map( (e, i, arr) =>{
         if(!e) return;
-        arr[i] = e.map( r => [ r, new BigNumber(1).minus( r ) ] );
+        arr[i] = e.map( r => (r === null || r === undefined) ? null : [ r, new Decimal(1).minus( r ) ] );
       });
     }
   
