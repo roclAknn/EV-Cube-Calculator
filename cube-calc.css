@@ -1096,11 +1096,14 @@ main.fit {
 .res-score-col {
   font-weight: 700;
   justify-content: center;
-  background: #f9fafb;
 }
 
 .res-td:not(.res-score-col) {
   justify-content: flex-end;
+}
+
+.res-td.masked{
+  background: #f8fafc !important;
 }
 
 
