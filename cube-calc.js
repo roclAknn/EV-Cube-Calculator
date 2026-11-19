@@ -970,8 +970,10 @@ createTable.switch = function () {
     const borderStyle = idx > 0 && k === upgradekey[0] ? "border-top: 2px solid #ccc;" : "";
     const kk = type2 === "==" ? list[k][0] : list[k][1];
 
+    const isMask = idx % 2 === 0;
+    
     tableHtml += `
-      <div class="res-td res-score-col ${isUpg ? 'upg-row' : ''}" style="${borderStyle}">${k}</div>
+      <div class="res-td res-score-col ${isMask ? 'masked' : ''} ${isUpg ? 'upg-row' : ''}" style="${borderStyle}">${k}</div>
     `;
 
     for (let c = 0; c <= (showPrice ? 1 : 0); c++) {
@@ -997,7 +999,7 @@ createTable.switch = function () {
       }
 
       tableHtml += `
-        <div class="res-td ${isUpg ? 'upg-row' : ''}" style="${borderStyle}">
+        <div class="res-td ${isMask ? 'masked' : ''} ${isUpg ? 'upg-row' : ''}" style="${borderStyle}">
           <span class="val-int">${intPart}</span><span class="val-dec">${decPart || ""}</span>
         </div>
       `;
