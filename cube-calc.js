@@ -762,6 +762,7 @@ function updateScorePreview(input) {
     }
     const res = inputCalc(expr);
     if (res >= 0) {
+      res = +res.toFixed(4);
       preview.innerText = `=${res}`;
       input.title = `計算結果: ${res}`;
       return;
