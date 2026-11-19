@@ -1481,6 +1481,15 @@ function applyScoreModal() {
     let val = input.value.trim();
 
     if (val !== "") {
+      // 式が入力されている場合（+ - * / () を含むか、式として計算できる場合）
+      if (/[+\-*/\(\)]/.test(val)) {
+        let expr = val;
+        // 四則演算子から始まるときは自動入力数値への演算
+        if (/^[+\-*/]/.test(val) && input.autoinput) {
+          expr = input.autoinput + val;
+        }
+        val = expr;
+      }
       const num = inputCalc(val);
       if (num >= 0) {
         groupScores.set(gid, { score: num, maxVal });
