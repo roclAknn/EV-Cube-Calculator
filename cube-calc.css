@@ -31,6 +31,8 @@
   --border-color: #d1d5db;
   --border-light: #e5e7eb;
 
+  --bg-white: #fffdfd;
+
   --font-main: Roboto, 'Noto Sans JP', 'Inter', sans-serif;
 }
 
@@ -203,7 +205,7 @@ main.fit {
   display: flex;
   flex-direction: column;
   gap: 6px;
-  background: #fffdfd;
+  background: #fff3ef;
   position: relative;
   overflow: visible;
   min-width: 0;
@@ -403,7 +405,7 @@ main.fit {
   padding: 12px 10px 10px;
   display: flex;
   flex-direction: column;
-  background: #fff;
+  background: var(--bg-white);
 }
 
 .cube-info-card {
@@ -420,7 +422,7 @@ main.fit {
   border-radius: 4px;
   overflow: hidden;
   font-size: 11px;
-  background: #fff;
+  background: var(--bg-white);
 }
 
 .ct-row {
@@ -504,7 +506,7 @@ main.fit {
   border: 1px solid var(--border-color);
   border-radius: 4px;
   padding: 4px 8px;
-  background: #fff;
+  background: var(--bg-white);
 }
 
 .hexa-col {
@@ -555,7 +557,7 @@ main.fit {
   コンディションバー（2行レイアウト）
 ==================================================*/
 .condition-bar {
-  background: #fef8f6;
+  background: var(--bg-white);
   border-bottom: 1px solid var(--border-color);
   display: flex;
   flex-direction: column;
@@ -661,7 +663,6 @@ main.fit {
   justify-content: space-between;
   padding: 3px 8px;
   min-height: 36px;
-  background: #fffdfd;
   gap: 8px;
   flex-wrap: wrap-reverse;
 }
