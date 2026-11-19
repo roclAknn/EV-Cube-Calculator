@@ -1034,6 +1034,10 @@ main.fit {
   white-space: nowrap;
   pointer-events: none;
   user-select: none;
+  display: none;
+}
+.expanded .calc-preview {
+  display: inline;
 }
 
 .pot-rate {
