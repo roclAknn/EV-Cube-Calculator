@@ -1379,14 +1379,12 @@ function buildScoreModalBody() {
     stat.count++;
   });
 
-  console.log([...groupStats]);
   groupStats = new Map(
     [...groupStats].sort((a, b) => {
       const g = commons.potentialGroups;
       return g.findIndex(e => e.id === a[0]) - g.findIndex(e => e.id === b[0]);
     })
   );
-  console.log([...groupStats]);
 
   let html = `
     <div class="score-modal-intro">
