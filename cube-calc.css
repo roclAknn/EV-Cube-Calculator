@@ -413,6 +413,9 @@ main.fit {
   flex-direction: column;
   gap: 4px;
 }
+.cube-info-card-header {
+  margin-bottom: 2px;
+}
 
 /* 昇級確率表（縦横入れ替え版） */
 .cube-transposed-table {
