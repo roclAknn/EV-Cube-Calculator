@@ -762,7 +762,6 @@ function updateScorePreview(input) {
     }
     const res = inputCalc(expr);
     if (res >= 0) {
-      res = +res.toFixed(4);
       preview.innerText = `=${res}`;
       input.title = `計算結果: ${res}`;
       return;
@@ -1058,7 +1057,7 @@ function inputCalc(expr) {
   try {
     if (!/^[0-9.+\-*/\(\)\s]+$/.test(expr)) throw new Error("invalid characters");
     const ret = Function(`"use strict"; return (${expr})`)();
-    return +ret.toFixed(12);
+    return +ret.toFixed(4);
   } catch {
     return -1;
   }
