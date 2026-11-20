@@ -863,7 +863,7 @@ main.fit {
 
 .pane-header-row {
   display: grid;
-  grid-template-columns: 1fr 62px 62px;
+  grid-template-columns: 24px 1fr 62px 62px;
   background: var(--accent);
   color: #fff;
   font-weight: 700;
@@ -875,29 +875,49 @@ main.fit {
 
 .pane-th {
   text-align: center;
-  padding: 0 4px;
+  padding: 0 3px;
   white-space: nowrap;
 }
 
+.pane-th-reset-btn-col {
+  padding: 0;
+  margin-left: 2px;
+}
+
+.pane-th-reset-btn,
 .pane-th-score-btn {
   background: rgba(255, 255, 255, 0.2);
   border: 1px solid rgba(255, 255, 255, 0.4);
-  color: #fff;
+  cursor: pointer;
+  color: inherit;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: inherit;
+  &:hover {
+    background: #fff;
+    color: var(--accent-dark);
+  }
+}
+
+.pane-th-reset-btn {
+  width: 22px;
+  height: 23px;
+  padding: 0;
+  border-radius: 2px;
+  font-size: 10px;
+}
+
+.pane-th-score-btn {
   border-radius: 4px;
   cursor: pointer;
   padding: 1px 4px;
   font-size: 11px;
   font-weight: 700;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
   gap: 2px;
+  width: 100%;
 }
 
-.pane-th-score-btn:hover {
-  background: #fff;
-  color: var(--accent-dark);
-}
 
 .potential-list-scroll {
   flex: 1;
@@ -946,6 +966,7 @@ main.fit {
 .pot-btn-col {
   justify-content: center;
   padding: 0;
+  margin-left: 1px;
 }
 
 .auto-btn {

@@ -825,6 +825,19 @@ function onautoinput() {
   }
 }
 
+function resetAllScore(){
+  let list = document.querySelectorAll(`.potential-pane .input-score`);
+  list = [...list].filter(e => e.value !== "");
+  if (list.length <= 0) return;
+  if ( !confirm(`すべての入力スコアをリセットしますか (対象数: ${list.length}項目)`) ){
+    return;
+  }
+  list.forEach(el=>{
+    el.value = "";
+    el.oninput();
+  });
+}
+
 /*==================== 計算結果表（出力テーブル）生成 ====================*/
 function createTable(result) {
   createTable.result = result;
