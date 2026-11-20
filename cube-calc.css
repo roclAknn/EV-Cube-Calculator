@@ -643,7 +643,7 @@ main.fit {
 }
 
 .rank-pill {
-  padding: 2px 7px;
+  padding: 3px 7px 1px;
   border-radius: 10px;
   font-size: 11px;
   font-weight: 700;
@@ -780,6 +780,7 @@ main.fit {
 }
 
 .param-unit {
+  margin-top: 3px;
   font-size: 11px;
   color: #666;
 }
@@ -788,7 +789,7 @@ main.fit {
   display: flex;
   align-items: center;
   gap: 4px;
-  padding: 0 8px;
+  padding: 2px 8px 0;
   height: 100%;
   border: none;
   background: var(--accent-dim);
@@ -812,7 +813,7 @@ main.fit {
 
 .condition-toggle-btn {
   height: 28px;
-  padding: 0 6px;
+  padding: 2px 6px 0;
   border: 1.5px solid var(--border-color);
   border-radius: 4px;
   background: #fff;
@@ -835,7 +836,7 @@ main.fit {
   height: 28px;
   border: 1.5px solid var(--border-color);
   border-radius: 4px;
-  padding: 0 4px;
+  padding: 2px 4px 0;
   background: #fff;
   gap: 2px;
 }
