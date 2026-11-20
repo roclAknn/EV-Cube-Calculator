@@ -484,6 +484,9 @@ main.fit {
 }
 
 /* 等級別アンダーライン（数値がある場合のみ） */
+.ct-cell.has-underline {
+  border-top: 2.5px solid transparent
+}
 .ct-cell.has-underline.underline-legendary {
   border-bottom: 2.5px solid var(--legendary-border);
 }
@@ -501,7 +504,7 @@ main.fit {
 }
 
 .ct-cell.no-underline {
-  border-bottom: none;
+  border: none !important;
   color: #999;
 }
 
