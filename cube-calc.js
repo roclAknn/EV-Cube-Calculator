@@ -426,7 +426,9 @@ function renderNormalCubeInfo(container, cubeDef, ratetable, upgtable, remarks) 
 
       // 数値の場合のみ等級色アンダーラインを引く
       const underlineClass = isNumeric ? `has-underline underline-${rankClass}` : "no-underline";
-      tableHtml += `<div class="ct-cell ${rankClass} ${underlineClass}">${valStr}</div>`;
+      tableHtml += `<div class="ct-cell ${rankClass} ${underlineClass}">
+        <div class="ct-cell-text">${valStr}</div>
+      </div>`;
     }
 
     tableHtml += `</div>`;
