@@ -77,6 +77,7 @@ main.fit {
 #maindiv-wrapper {
   width: 100%;
   max-width: 700px;
+  min-width: 520px;
   margin: 0 auto;
   padding: 8px;
 }
