@@ -21,6 +21,7 @@ GitHub Pages -> https://roclaknn.github.io/EV-Cube-Calculator/index.html
 ・デザインの大幅改修<br>
 ・同種スコアの一括入力を実装<br>
 ・出力形式などの調整<br>
+・入力値の保存が機能していなかった問題の修正（出力への影響なし）<br>
 ---- '26/09 ---------------<br>
 ・KMSTで追加されたプライムキューブ、プライムアディショナルキューブに対応<br>
 
