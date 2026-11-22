@@ -34,7 +34,7 @@ window.selectedrank = -1;
 window.selectedmaxline = 3;
 window.checkedapplyerrlist = true;
 window.exportdata = {};
-window.scoretemps = [];
+window.scoretemps = {};
 
 /* Decimal.jsの設定 */
 Decimal.set({ precision: 40 });
@@ -626,22 +626,29 @@ function createcubetable(exportdata) {
   window.exportdata = { ...exportdata, weights: [] };
 
   const ownerdiv = document.getElementById("potential-list-body");
-  ownerdiv.innerHTML = "";
 
   // 既存スコアを保持
-  scoretemps = [];
-  const names = document.getElementsByClassName("potential-name");
-  const vals = document.getElementsByClassName("potential-val");
-  const scoreInputs = document.querySelectorAll(".potential-score > input");
+  // scoretemps = {};
+  const names = ownerdiv.querySelectorAll(".pot-name");
+  const vals = ownerdiv.querySelectorAll(".pot-val");
+  const scoreInputs = ownerdiv.querySelectorAll(".input-score");
   for (let i = 0; i < names.length; i++) {
-    if (checkValueType(scoreInputs[i].value) >= 1) {
-      scoretemps.push({
-        name: names[i].innerHTML,
-        val: vals[i].innerHTML,
-        score: scoreInputs[i].value
+    const name = names[i].innerHTML;
+    const val = vals[i].innerHTML;
+    const score = scoreInputs[i].value;
+    if (checkValueType(scoreInputs[i].value) >= 0) {
+      const pname = name + val;
+      let temp = scoretemps[pname];
+      if (!temp) scoretemps[pname] = temp = {};
+
+      Object.assign(temp, {
+        name, val, score // scoreは評価値ではなく式のまま。エラー式は弾く
       });
     }
   }
+
+  // 潜在能力一覧を生成
+  ownerdiv.innerHTML = "";
 
   const fragment = new DocumentFragment();
   createpotentialline(eqp, rank, lv);
@@ -709,16 +716,13 @@ function createcubetable(exportdata) {
       btn.onclick = onautoinput;
 
       // 復元
-      for (let temp of scoretemps) {
-        if (temp.val === (val || "") && temp.name === name) {
-          input.value = temp.score;
-          btn.classList.add("delete");
-          btn.innerText = "×";
-          updateScorePreview(input);
-          break;
-        }
+      const temp = scoretemps[name + (val || "")];
+      if (temp && temp.score !== "") {
+        input.value = temp.score;
+        btn.classList.add("delete");
+        btn.innerText = "×";
+        updateScorePreview(input);
       }
-
       fragment.appendChild(rowdiv);
     });
   }
@@ -827,14 +831,14 @@ function onautoinput() {
   }
 }
 
-function resetAllScore(){
+function resetAllScore() {
   let list = document.querySelectorAll(`.potential-pane .input-score`);
   list = [...list].filter(e => e.value !== "");
   if (list.length <= 0) return;
-  if ( !confirm(`すべての入力スコアをリセットしますか (対象数: ${list.length}項目)`) ){
+  if (!confirm(`すべての入力スコアをリセットしますか (対象数: ${list.length}項目)`)) {
     return;
   }
-  list.forEach(el=>{
+  list.forEach(el => {
     el.value = "";
     el.oninput();
   });
@@ -986,7 +990,7 @@ createTable.switch = function () {
     const kk = type2 === "==" ? list[k][0] : list[k][1];
 
     const isMask = idx % 2 === 0;
-    
+
     tableHtml += `
       <div class="res-td res-score-col ${isMask ? 'masked' : ''} ${isUpg ? 'upg-row' : ''}" style="${borderStyle}">${k}</div>
     `;
