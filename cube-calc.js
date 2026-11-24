@@ -544,12 +544,12 @@ function initDisplayAmountSlider() {
   const labels = ["主要のみ", "有効のみ", "すべて"];
   const filterLabel = document.getElementById("filter-slider-label");
 
-  let posIdx = 1;
+  let posIdx = filterLabel.posIdx = 1;
   const positions = [5, 50, 95];
   let isDragging = false;
 
   function setSliderPos(idx) {
-    posIdx = Math.min(2, Math.max(0, idx));
+    posIdx = filterLabel.posIdx = Math.min(2, Math.max(0, idx));
     knob.style.left = `${positions[posIdx]}%`;
     fill.style.width = `${positions[posIdx]}%`;
     if (filterLabel) filterLabel.innerText = labels[posIdx];
@@ -615,7 +615,6 @@ function onchangedisplayamount(val) {
     // 交互にmaskedクラスを付与して背景色を変化
     el.classList.toggle("masked", visiblenum % 2 === 0);
   });
-
   createTable(ondo());
 }
 
@@ -657,7 +656,8 @@ function createcubetable(exportdata) {
 
   // 絞り込み適用
   const filterLabel = document.getElementById("filter-slider-label");
-  const curFilter = filterLabel ? (filterLabel.innerText === "すべて" ? 0 : filterLabel.innerText === "主要のみ" ? 2 : 1) : 1;
+  const curFilter = filterLabel?.posIdx ?? 1;
+  
   onchangedisplayamount(curFilter);
 
   function createpotentialline(eqp, rank, lv) {
